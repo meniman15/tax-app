@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Israeli Tax Aggregation App
 
-## Getting Started
+A modern web application built with Next.js that automates the extraction and aggregation of Israeli tax documents using AI (Google Gemini 1.5 Flash).
 
-First, run the development server:
+The app allows users to upload various financial documents (Form 106, Form 867, Donation Receipts), uses AI to extract structured financial data, and aggregates the results into a unified view mirroring the Israeli Form 1301.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **AI-Powered Extraction**: Leverages Google's Gemini 1.5 Flash model with Structured Outputs to parse complex, unstructured Hebrew PDF tax forms with extreme precision.
+- **Form Support**:
+  - **Form 106 (טופס 106)**: Salary, Bituh Leumi, Health Tax, Pension deductions, Keren Hishtalmut, etc.
+  - **Form 867 (טופס 867)**: Capital Gains (20%/25%), Dividends (15%/20%), Interest, Real Estate, and complex Tax Withheld aggregation.
+  - **Donation Receipts**: Extracts Section 46 approved charitable contributions.
+- **Smart Aggregation**: Automatically maps extracted data into the correct Form 1301 tax boxes based on account ownership (Main Taxpayer vs Spouse vs Shared).
+- **Calculation Transparency**: The AI provides a detailed step-by-step reasoning log for every extracted value, ensuring auditable and trustworthy math.
+- **Interactive Tax Map**: A beautiful UI to view the final Form 1301 box mappings, with bilingual descriptions (Hebrew/English) and manual override capabilities.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Frontend**: Next.js 14 App Router, React, Tailwind CSS, Lucide Icons.
+- **Backend**: Next.js API Routes (`/api/extract`, `/api/aggregate`).
+- **AI Engine**: `@google/genai` SDK using `gemini-1.5-flash` for multimodal document understanding and structured JSON extraction.
+- **Tax Engine**: Custom TypeScript engine (`taxMath.ts`) for enforcing Israeli tax aggregation rules and handling offsets/net taxes.
 
-## Learn More
+## Setup
 
-To learn more about Next.js, take a look at the following resources:
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/meniman15/tax-app.git
+   cd tax-app
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. **Configure Environment Variables:**
+   Create a `.env.local` file in the root directory and add your Google Gemini API key:
+   ```env
+   GEMINI_API_KEY=your_api_key_here
+   ```
 
-## Deploy on Vercel
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Contributing
+
+Contributions are welcome! Please ensure that any changes to the extraction logic in `extractDocument.ts` are accompanied by detailed reasoning instructions for the AI prompt.
+
+## License
+
+MIT
