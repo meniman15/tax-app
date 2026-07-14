@@ -16,6 +16,7 @@ interface UploadedFile {
 interface TaxMapEntry {
   value: number;
   description: string;
+  breakdown?: { label: string; value: number }[];
 }
 
 type TaxMap = Record<string, TaxMapEntry>;
