@@ -163,23 +163,33 @@ export default function TaxAssistantPage() {
     setIsProcessing(true);
     setError(null);
 
-    // Mark all as processing
-    setFiles(prev => prev.map(f => ({ ...f, status: 'processing' })));
+    const filesToProcess = files.filter(f => f.status !== 'done');
+    
+    // Mark only pending files as processing
+    setFiles(prev => prev.map(f => f.status !== 'done' ? { ...f, status: 'processing' } : f));
 
     try {
-      const formData = new FormData();
-      files.forEach(f => formData.append('files', f.file));
+      let newResults: any[] = [];
+      
+      if (filesToProcess.length > 0) {
+        const formData = new FormData();
+        filesToProcess.forEach(f => formData.append('files', f.file));
 
-      const extractRes = await fetch('/api/extract', { method: 'POST', body: formData });
-      if (!extractRes.ok) {
-        const err = await extractRes.json();
-        throw new Error(err.error || 'Extraction failed');
+        const extractRes = await fetch('/api/extract', { method: 'POST', body: formData });
+        if (!extractRes.ok) {
+          const err = await extractRes.json();
+          throw new Error(err.error || 'Extraction failed');
+        }
+        const { results } = await extractRes.json();
+        newResults = results;
       }
-      const { results } = await extractRes.json();
 
+      let newResultIndex = 0;
+      
       // Update files with results
-      setFiles(prev => prev.map((f, i) => {
-        const result = results[i];
+      setFiles(prev => prev.map(f => {
+        if (f.status === 'done') return f;
+        const result = newResults[newResultIndex++];
         if (!result) return { ...f, status: 'error' as const, error: 'No result' };
         return {
           ...f,
@@ -189,11 +199,26 @@ export default function TaxAssistantPage() {
         };
       }));
 
+      // Gather all results for aggregation
+      // Since we just dispatched setFiles, we must use the current `files` array combined with `newResults`
+      // to get the total extractedForms
+      let resultCursor = 0;
+      const allExtractedForms = files.map(f => {
+        if (f.status === 'done') {
+          return {
+            file: f.file.name,
+            classification: { documentType: f.classification },
+            data: f.extractedData
+          };
+        }
+        return newResults[resultCursor++];
+      }).filter(Boolean);
+
       // Now aggregate
       const aggRes = await fetch('/api/aggregate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ extractedForms: results, formType }),
+        body: JSON.stringify({ extractedForms: allExtractedForms, formType }),
       });
       if (!aggRes.ok) {
         const err = await aggRes.json();
