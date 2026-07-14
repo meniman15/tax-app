@@ -66,9 +66,10 @@ export function aggregateToTaxMap(
     classification: { documentType: string };
     data: Record<string, unknown> | null;
   }[],
-): { taxMap: TaxMap; aggregationLog: AggregationLog } {
+): { taxMap: TaxMap; aggregationLog: AggregationLog; form106CreditPoints: number | null } {
   const map: TaxMap = {};
   const aggregationLog: AggregationLog = [];
+  let form106CreditPoints: number | null = null;
 
   for (const form of extractedForms) {
     if (!form.data) continue;
@@ -107,6 +108,10 @@ export function aggregateToTaxMap(
         addToMap(map, taxCodes.pensionInsured.boxes[ownIdx], asNum(d.pensionInsuredSalary), logEntry, `Pension Insured Salary${suffix}`);
         addToMap(map, taxCodes.pensionDeduction.boxes[ownIdx], asNum(d.pensionEmployeeDeduction), logEntry, `Pension Employee Deduction${suffix}`);
         addToMap(map, taxCodes.recreationPay.boxes[ownIdx], asNum(d.recreationPayDeduction), logEntry, `Recreation Pay Deduction${suffix}`);
+        // Accumulate credit points from all Form 106s
+        if (asNum(d.creditPoints) > 0) {
+          form106CreditPoints = (form106CreditPoints ?? 0) + asNum(d.creditPoints);
+        }
         break;
 
       case 'FORM_867':
@@ -177,7 +182,7 @@ export function aggregateToTaxMap(
     }
   }
 
-  return { taxMap: map, aggregationLog };
+  return { taxMap: map, aggregationLog, form106CreditPoints };
 }
 
 // ── Utility ─────────────────────────────────────────────────────────────────

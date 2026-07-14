@@ -110,6 +110,7 @@ export default function TaxAssistantPage() {
   const [aggregationLog, setAggregationLog] = useState<any[]>([]);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [showAiReasoning, setShowAiReasoning] = useState(false);
+  const [form106CreditPoints, setForm106CreditPoints] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function computeCreditPoints(details: typeof personalDetails) {
@@ -229,12 +230,13 @@ export default function TaxAssistantPage() {
         const err = await aggRes.json();
         throw new Error(err.error || 'Aggregation failed');
       }
-      const { taxMap: map, aggregationLog: log } = await aggRes.json();
+      const { taxMap: map, aggregationLog: log, form106CreditPoints: pts } = await aggRes.json();
       // Re-inject personal credit points so aggregation doesn't overwrite them
       const { points, creditValue } = computeCreditPoints(personalDetails);
       map['067'] = { value: creditValue, description: `Personal Credit Points (${points} pts)` };
       setTaxMap(map);
       setAggregationLog(log || []);
+      if (pts != null) setForm106CreditPoints(pts);
       setStep(2);
     } catch (err: any) {
       setError(err.message || 'Processing failed. Please try again.');
@@ -438,10 +440,15 @@ export default function TaxAssistantPage() {
 
           {/* Personal Details Panel */}
           <div className="tax-map-section" style={{ borderColor: 'rgba(0, 209, 255, 0.2)' }}>
-            <div className="section-header">
+            <div className="section-header" style={{ marginBottom: 4 }}>
               <span className="section-dot dot-salary" style={{ backgroundColor: '#00D1FF' }} />
               <h3>Personal Details (Credit Points)</h3>
             </div>
+            {form106CreditPoints != null && form106CreditPoints > 0 && (
+              <p style={{ fontSize: '0.85rem', color: '#ffcc00', marginBottom: 12 }}>
+                ⚠️ Note: According to your Form 106, you have {form106CreditPoints} credit points.
+              </p>
+            )}
             <div className="flex gap-12" style={{ flexWrap: 'wrap', marginTop: 12, marginBottom: 24 }}>
               <div className="flex flex-col" style={{ gap: 4 }}>
                 <label style={{ fontSize: '0.85rem', color: '#aaa' }}>Gender</label>

@@ -64,6 +64,7 @@ const Form106ResponseSchema: Schema = {
     pensionInsuredSalary: { type: Type.NUMBER },
     pensionEmployeeDeduction: { type: Type.NUMBER },
     recreationPayDeduction: { type: Type.NUMBER },
+    creditPoints: { type: Type.NUMBER, description: "Total credit points (נקודות זיכוי) shown on the form, e.g. box 029 or equivalent. Return 0 if not found." },
     calculationLog: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Provide a sentence-by-sentence calculation log explaining your math step-by-step. E.g. 'Added 12505 from page 1 for gross income'." },
   },
   required: [

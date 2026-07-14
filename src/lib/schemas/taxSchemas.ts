@@ -59,6 +59,10 @@ export const Form106Schema = z.object({
     .number()
     .default(0)
     .describe('Box 011/012'),
+  creditPoints: z
+    .number()
+    .default(0)
+    .describe('Total credit points (נקודות זיכוי) on the form, box 029 or equivalent. 0 if absent.'),
   calculationLog: z.array(z.string()).default([]),
 });
 

@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
       const { usTaxMap, aggregationLog } = generateUsTaxMap(extractedForms);
       return NextResponse.json({ taxMap: usTaxMap, aggregationLog, formType: 'US' });
     }
-    const { taxMap, aggregationLog } = aggregateToTaxMap(extractedForms);
-    return NextResponse.json({ taxMap, aggregationLog, formType: 'IL' });
+    const { taxMap, aggregationLog, form106CreditPoints } = aggregateToTaxMap(extractedForms);
+    return NextResponse.json({ taxMap, aggregationLog, form106CreditPoints, formType: 'IL' });
   } catch (error: any) {
     console.error('Aggregation error:', error);
     return NextResponse.json({ error: error.message || 'Aggregation failed' }, { status: 500 });
