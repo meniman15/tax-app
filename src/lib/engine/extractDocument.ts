@@ -162,6 +162,29 @@ const AnnualSummaryResponseSchema: Schema = {
   required: ['ownershipType', 'providerName', 'year', 'rentalIncomeIsrael', 'rentalIncomeAbroad', 'businessIncome', 'calculationLog'],
 };
 
+const PensionDepositResponseSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    ownershipType: { type: Type.STRING, description: "SHARED, MAIN, or SECONDARY" },
+    providerName: { type: Type.STRING },
+    year: { type: Type.NUMBER },
+    amount: { type: Type.NUMBER },
+    calculationLog: { type: Type.ARRAY, items: { type: Type.STRING } },
+  },
+  required: ['ownershipType', 'providerName', 'year', 'amount', 'calculationLog'],
+};
+
+const AnnualSummaryResponseSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    ownershipType: { type: Type.STRING, description: "SHARED, MAIN, or SECONDARY" },
+    year: { type: Type.NUMBER },
+    businessIncome: { type: Type.NUMBER },
+    calculationLog: { type: Type.ARRAY, items: { type: Type.STRING } },
+  },
+  required: ['ownershipType', 'year', 'businessIncome', 'calculationLog'],
+};
+
 // ── Prompts ─────────────────────────────────────────────────────────────────
 
 
@@ -278,8 +301,8 @@ const EXTRACTION_CONFIG: Record<
   DONATION_RECEIPT: { prompt: DONATION_PROMPT, responseSchema: DonationReceiptResponseSchema, zodSchema: DonationReceiptSchema },
   CONSULTANT_INVOICE: { prompt: CONSULTANT_PROMPT, responseSchema: ConsultantInvoiceResponseSchema, zodSchema: ConsultantInvoiceSchema },
   LIFE_INSURANCE: { prompt: LIFE_INSURANCE_PROMPT, responseSchema: LifeInsuranceResponseSchema, zodSchema: LifeInsuranceSchema },
-  PENSION_DEPOSIT: { prompt: PENSION_DEPOSIT_PROMPT, responseSchema: PensionDepositSchema, zodSchema: PensionDepositSchema },
-  ANNUAL_CPA_SUMMARY: { prompt: ANNUAL_CPA_SUMMARY_PROMPT, responseSchema: AnnualSummarySchema, zodSchema: AnnualSummarySchema },
+  PENSION_DEPOSIT: { prompt: PENSION_DEPOSIT_PROMPT, responseSchema: PensionDepositResponseSchema, zodSchema: PensionDepositSchema },
+  ANNUAL_CPA_SUMMARY: { prompt: ANNUAL_CPA_SUMMARY_PROMPT, responseSchema: AnnualSummaryResponseSchema, zodSchema: AnnualSummarySchema },
   US_FORM_1099: { prompt: US_FORM_1099_PROMPT, responseSchema: Form867ResponseSchema, zodSchema: Form867Schema },
 };
 
