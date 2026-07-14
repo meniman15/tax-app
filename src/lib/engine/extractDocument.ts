@@ -168,13 +168,14 @@ const CLASSIFICATION_PROMPT = `You are an Israeli tax document classifier. Class
 
 Rules:
 - FORM_106: Annual employer tax certificate (תיאום מס / טופס 106). Contains salary, tax withheld, employer name.
-- FORM_867: Annual bank/broker securities report. Contains capital gains, losses, interest, dividends.
-- FORM_856: ESOP/stock option exercise report. Contains option grants and exercises.
+- FORM_867: Capital gains / passive income from a bank/broker (טופס 867).
+- FORM_856: ESOP / Employee Stock Ownership plan certificate (טופס 856).
+- DONATION_RECEIPT: A receipt for a donation made to a charity or non-profit (קבלה לתרומה / סעיף 46 / קבלה ממוסד ציבורי / עמותה).
+- CONSULTANT_INVOICE: Invoice for tax consulting or CPA services (חשבונית יעוץ מס / רואה חשבון).
 - LIFE_INSURANCE: Life insurance annual statement.
-- DONATION_RECEIPT: Receipt from an approved charity (Section 46).
-- CONSULTANT_INVOICE: Invoice for professional services (accountant, tax preparer).
-- TEUDAT_ZEHUT: Israeli ID card.
-- US_FORM_1099: US 1099-INT, 1099-DIV, 1099-B, etc.
+- PENSION_DEPOSIT: Independent provident fund or pension deposit confirmation (אישור הפקדה לקופת גמל / קרן פנסיה).
+- ANNUAL_CPA_SUMMARY: Annual income summary provided by an accountant or business entity.
+- US_FORM_1099: US tax statement (1099-INT, 1099-DIV, 1099-B, etc.).
 - UNKNOWN: Cannot be classified.
 
 Return the documentType, a confidenceScore (0-100), and a one-line summary.`;
@@ -225,8 +226,12 @@ CRUCIAL: You MUST provide a 'calculationLog' explaining your math step-by-step. 
 
 All monetary values in ILS. Return 0 for any field not found.`;
 
-const DONATION_PROMPT = `You are extracting data from an Israeli donation receipt (קבלה לתרומה).
-Determine if this is a Section 46 approved charity (סעיף 46).
+const DONATION_PROMPT = `You are extracting data from an Israeli donation receipt (קבלה לתרומה / קבלה ממוסד ציבורי).
+1. Extract the charityName (שם העמותה).
+2. Extract the receiptNumber (מספר קבלה) and date.
+3. Extract the total donation amount. Look for "סך הכל", "סה״כ", or the main receipt amount.
+4. Determine if it explicitly states it is a Section 46 approved charity (מוכר לפי סעיף 46 לפקודת מס הכנסה).
+5. Provide a calculationLog explaining your extraction.
 All monetary values in ILS.`;
 
 const CONSULTANT_PROMPT = `You are extracting data from a consultant/accountant invoice (חשבונית).

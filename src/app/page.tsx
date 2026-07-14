@@ -116,7 +116,6 @@ export default function TaxAssistantPage() {
   function computeCreditPoints(details: typeof personalDetails) {
     let points = 2.25;
     if (details.gender === 'F') points += 0.5;
-    if (details.maritalStatus === 'MARRIED') points += 0.5;
     points += details.childrenCount * 1.5;
     const creditValue = Math.round(points * 2904); // Official ITA 2025: ₪242/month × 12
     return { points, creditValue };
