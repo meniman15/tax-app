@@ -506,8 +506,8 @@ export default function TaxAssistantPage() {
                             <input
                               className="value-input"
                               type="text"
-                              defaultValue={formatNumber(entry.value)}
-                              onBlur={e => updateValue(box, e.target.value)}
+                              value={formatNumber(entry.value)}
+                              onChange={e => updateValue(box, e.target.value)}
                               onFocus={e => e.target.select()}
                             />
                           </td>
