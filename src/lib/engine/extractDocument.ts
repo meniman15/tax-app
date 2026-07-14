@@ -136,31 +136,6 @@ const LifeInsuranceResponseSchema: Schema = {
 };
 
 
-const PensionDepositResponseSchema: Schema = {
-  type: Type.OBJECT,
-  properties: {
-    ownershipType: { type: Type.STRING },
-    providerName: { type: Type.STRING },
-    year: { type: Type.NUMBER },
-    amount: { type: Type.NUMBER },
-    calculationLog: { type: Type.ARRAY, items: { type: Type.STRING } },
-  },
-  required: ['ownershipType', 'providerName', 'year', 'amount', 'calculationLog'],
-};
-
-const AnnualSummaryResponseSchema: Schema = {
-  type: Type.OBJECT,
-  properties: {
-    ownershipType: { type: Type.STRING },
-    providerName: { type: Type.STRING },
-    year: { type: Type.NUMBER },
-    rentalIncomeIsrael: { type: Type.NUMBER },
-    rentalIncomeAbroad: { type: Type.NUMBER },
-    businessIncome: { type: Type.NUMBER },
-    calculationLog: { type: Type.ARRAY, items: { type: Type.STRING } },
-  },
-  required: ['ownershipType', 'providerName', 'year', 'rentalIncomeIsrael', 'rentalIncomeAbroad', 'businessIncome', 'calculationLog'],
-};
 
 const PensionDepositResponseSchema: Schema = {
   type: Type.OBJECT,
