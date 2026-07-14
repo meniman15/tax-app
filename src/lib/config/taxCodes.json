@@ -110,5 +110,21 @@
       "037",
       "237"
     ]
+  },
+  "lifeInsurance": {
+    "description": "Life Insurance Premium",
+    "boxes": [
+      null,
+      "036",
+      "081"
+    ]
+  },
+  "lossOfWorkingCapacity": {
+    "description": "Loss of Working Capacity Premium",
+    "boxes": [
+      null,
+      "112",
+      "113"
+    ]
   }
 }

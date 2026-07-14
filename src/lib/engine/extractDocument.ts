@@ -7,11 +7,13 @@ import {
   Form867Schema,
   DonationReceiptSchema,
   ConsultantInvoiceSchema,
+  LifeInsuranceSchema,
   type DocumentClassification,
   type Form106,
   type Form867,
   type DonationReceipt,
   type ConsultantInvoice,
+  type LifeInsurance,
 } from '../schemas/taxSchemas';
 
 // ── Types ───────────────────────────────────────────────────────────────────
@@ -116,10 +118,22 @@ const ConsultantInvoiceResponseSchema: Schema = {
   required: ['providerName', 'amount', 'date', 'description'],
 };
 
+const LifeInsuranceResponseSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    ownershipType: { type: Type.STRING, description: "MAIN or SECONDARY based on the account owner" },
+    insuranceCompany: { type: Type.STRING },
+    year: { type: Type.NUMBER },
+    lifeInsurancePremium: { type: Type.NUMBER, description: "פרמיה לביטוח חיים (usually codes 036/081)" },
+    lossOfWorkingCapacityPremium: { type: Type.NUMBER, description: "פרמיה לביטוח אבדן כושר עבודה (usually codes 112/113/206/207)" },
+    calculationLog: { type: Type.ARRAY, items: { type: Type.STRING } },
+  },
+  required: ['ownershipType', 'insuranceCompany', 'year', 'lifeInsurancePremium', 'lossOfWorkingCapacityPremium', 'calculationLog'],
+};
+
 // ── Prompts ─────────────────────────────────────────────────────────────────
 
-const CLASSIFICATION_PROMPT = `You are an Israeli tax document classifier. Classify this document into EXACTLY one of:
-FORM_106, FORM_867, FORM_856, LIFE_INSURANCE, DONATION_RECEIPT, CONSULTANT_INVOICE, TEUDAT_ZEHUT, US_FORM_1099, UNKNOWN.
+const CLASSIFICATION_PROMPT = `You are an Israeli tax document classifier. Classify this document into EXACTLY one enum: ['FORM_106', 'FORM_867', 'FORM_856', 'DONATION_RECEIPT', 'CONSULTANT_INVOICE', 'LIFE_INSURANCE', 'UNKNOWN'], TEUDAT_ZEHUT, US_FORM_1099, UNKNOWN.
 
 Rules:
 - FORM_106: Annual employer tax certificate (תיאום מס / טופס 106). Contains salary, tax withheld, employer name.
@@ -188,6 +202,13 @@ const CONSULTANT_PROMPT = `You are extracting data from a consultant/accountant 
 Extract the provider name, total amount (including VAT), date, and a brief description of the service.
 All monetary values in ILS.`;
 
+const LIFE_INSURANCE_PROMPT = `Extract the financial data from this Life Insurance / Loss of Working Capacity tax certificate (אישור מס על תשלום פרמיה).
+1. ownershipType: If the name is one person (e.g. "מנחם גרוסמן"), classify as MAIN.
+2. insuranceCompany: The name of the insurance company (e.g., "הפניקס").
+3. lifeInsurancePremium: The amount for פרמיה לביטוח חיים (codes 036/081).
+4. lossOfWorkingCapacityPremium: The amount for פרמיה לביטוח אבדן כושר עבודה (codes 112/113/206/207).
+5. Provide a calculationLog explaining where you found each number.`;
+
 // ── Schema & prompt mapping ─────────────────────────────────────────────────
 
 const EXTRACTION_CONFIG: Record<
@@ -198,6 +219,7 @@ const EXTRACTION_CONFIG: Record<
   FORM_867: { prompt: FORM_867_PROMPT, responseSchema: Form867ResponseSchema, zodSchema: Form867Schema },
   DONATION_RECEIPT: { prompt: DONATION_PROMPT, responseSchema: DonationReceiptResponseSchema, zodSchema: DonationReceiptSchema },
   CONSULTANT_INVOICE: { prompt: CONSULTANT_PROMPT, responseSchema: ConsultantInvoiceResponseSchema, zodSchema: ConsultantInvoiceSchema },
+  LIFE_INSURANCE: { prompt: LIFE_INSURANCE_PROMPT, responseSchema: LifeInsuranceResponseSchema, zodSchema: LifeInsuranceSchema },
 };
 
 // ── Main extraction function ────────────────────────────────────────────────

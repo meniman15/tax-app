@@ -109,3 +109,16 @@ export const ConsultantInvoiceSchema = z.object({
 });
 
 export type ConsultantInvoice = z.infer<typeof ConsultantInvoiceSchema>;
+
+// ── Life Insurance / Loss of Working Capacity ───────────────────────────────
+
+export const LifeInsuranceSchema = z.object({
+  ownershipType: z.enum(['SHARED', 'MAIN', 'SECONDARY']),
+  insuranceCompany: z.string(),
+  year: z.number(),
+  lifeInsurancePremium: z.number().default(0),
+  lossOfWorkingCapacityPremium: z.number().default(0),
+  calculationLog: z.array(z.string()).default([]),
+});
+
+export type LifeInsurance = z.infer<typeof LifeInsuranceSchema>;

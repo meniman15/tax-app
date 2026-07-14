@@ -65,4 +65,9 @@ export const BOX_DESCRIPTIONS: Record<
   '037': { he: 'סך תרומות מוכרות - בן הזוג הרשום', en: 'Recognized Donations (Main)', category: 'deductions' },
   '237': { he: 'סך תרומות מוכרות - בן/בת זוג', en: 'Recognized Donations (Spouse)', category: 'deductions' },
   'DEDUCTION_TAX_PREP': { he: 'הוצאות הנהלת חשבונות', en: 'Tax Preparation Expenses', category: 'deductions' },
+
+  '036': { he: 'פרמיה לביטוח חיים לקצבה - בן הזוג הרשום', en: 'Life Insurance Premium (Main)', category: 'deductions' },
+  '081': { he: 'פרמיה לביטוח חיים לקצבה - בן/בת זוג', en: 'Life Insurance Premium (Spouse)', category: 'deductions' },
+  '112': { he: 'ביטוח אובדן כושר עבודה - בן הזוג הרשום', en: 'Loss of Working Capacity (Main)', category: 'deductions' },
+  '113': { he: 'ביטוח אובדן כושר עבודה - בן/בת זוג', en: 'Loss of Working Capacity (Spouse)', category: 'deductions' },
 };
