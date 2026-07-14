@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { BOX_DESCRIPTIONS } from '@/lib/config/boxDescriptions';
 
 /* ── Types ─────────────────────────────────────────────────── */
@@ -103,10 +103,27 @@ export default function TaxAssistantPage() {
   const [formType, setFormType] = useState<FormType>('IL');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [personalDetails, setPersonalDetails] = useState({ gender: 'M', maritalStatus: 'SINGLE', childrenCount: 0 });
   const [aggregationLog, setAggregationLog] = useState<any[]>([]);
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [showAiReasoning, setShowAiReasoning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  
+  useEffect(() => {
+    let points = 2.25;
+    if (personalDetails.gender === 'F') points += 0.5;
+    points += personalDetails.childrenCount * 1.5;
+    const creditValue = points * 2928; // 2024/2025 value approx 244/mo * 12
+
+    setTaxMap(prev => ({
+      ...prev,
+      '067': {
+        value: creditValue,
+        description: `Personal Credit Points (${points} pts)`,
+      }
+    }));
+  }, [personalDetails]);
 
   /* ── File Handling ─────────────────────────────────────────── */
   const addFiles = useCallback((newFiles: File[]) => {
@@ -380,6 +397,35 @@ export default function TaxAssistantPage() {
               <button className={`toggle-btn ${formType === 'US' ? 'active' : ''}`} onClick={() => setFormType('US')}>
                 🇺🇸 US 1040
               </button>
+            </div>
+          </div>
+
+          
+          {/* Personal Details Panel */}
+          <div className="tax-map-section" style={{ backgroundColor: 'rgba(0, 209, 255, 0.05)', borderColor: 'rgba(0, 209, 255, 0.2)' }}>
+            <div className="section-header">
+              <span className="section-dot dot-salary" style={{ backgroundColor: '#00D1FF' }} />
+              <h3>Personal Details (Credit Points)</h3>
+            </div>
+            <div className="flex gap-12" style={{ flexWrap: 'wrap', marginTop: 12 }}>
+              <div className="flex flex-col" style={{ gap: 4 }}>
+                <label style={{ fontSize: '0.85rem', color: '#aaa' }}>Gender</label>
+                <select className="value-input" value={personalDetails.gender} onChange={e => setPersonalDetails(p => ({ ...p, gender: e.target.value }))} style={{ width: 120 }}>
+                  <option value="M">Male</option>
+                  <option value="F">Female</option>
+                </select>
+              </div>
+              <div className="flex flex-col" style={{ gap: 4 }}>
+                <label style={{ fontSize: '0.85rem', color: '#aaa' }}>Marital Status</label>
+                <select className="value-input" value={personalDetails.maritalStatus} onChange={e => setPersonalDetails(p => ({ ...p, maritalStatus: e.target.value }))} style={{ width: 140 }}>
+                  <option value="SINGLE">Single</option>
+                  <option value="MARRIED">Married</option>
+                </select>
+              </div>
+              <div className="flex flex-col" style={{ gap: 4 }}>
+                <label style={{ fontSize: '0.85rem', color: '#aaa' }}>Number of Children</label>
+                <input className="value-input" type="number" min="0" value={personalDetails.childrenCount} onChange={e => setPersonalDetails(p => ({ ...p, childrenCount: parseInt(e.target.value) || 0 }))} style={{ width: 120 }} />
+              </div>
             </div>
           </div>
 

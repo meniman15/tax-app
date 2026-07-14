@@ -93,7 +93,7 @@ export function aggregateToTaxMap(
       docType === 'FORM_106' ? d.employerName :
       docType === 'FORM_867' || docType === 'FORM_856' ? d.bankName :
       docType === 'DONATION_RECEIPT' ? d.charityName :
-      docType === 'CONSULTANT_INVOICE' ? d.providerName :
+      docType === 'CONSULTANT_INVOICE' || docType === 'PENSION_DEPOSIT' || docType === 'ANNUAL_CPA_SUMMARY' ? d.providerName :
       docType === 'LIFE_INSURANCE' ? d.insuranceCompany :
       '';
     const suffix = sourceName ? ` - ${sourceName}` : '';
@@ -122,6 +122,8 @@ export function aggregateToTaxMap(
         addToMap(map, taxTotals.interestTax.box, asNum(d.interestTaxWithheld), logEntry, `Tax on Interest${suffix}`);
         addToMap(map, taxCodes.dividend15.boxes[ownIdx], asNum(d.dividend15), logEntry, `Dividend Income (15%)${suffix}`);
         addToMap(map, taxCodes.dividend20.boxes[ownIdx], asNum(d.dividend20), logEntry, `Dividend Income (20%)${suffix}`);
+        addToMap(map, taxCodes.foreignIncome.boxes[ownIdx], asNum(d.foreignIncome), logEntry, `Foreign Income${suffix}`);
+        addToMap(map, taxCodes.foreignTaxWithheld.boxes[ownIdx], asNum(d.foreignTaxWithheld), logEntry, `Foreign Tax Withheld${suffix}`);
         break;
 
       case 'FORM_856':
@@ -140,6 +142,17 @@ export function aggregateToTaxMap(
       case 'LIFE_INSURANCE':
         addToMap(map, taxCodes.lifeInsurance.boxes[ownIdx], asNum(d.lifeInsurancePremium), logEntry, `Life Insurance${suffix}`);
         addToMap(map, taxCodes.lossOfWorkingCapacity.boxes[ownIdx], asNum(d.lossOfWorkingCapacityPremium), logEntry, `Loss of Working Capacity${suffix}`);
+        break;
+
+
+      case 'PENSION_DEPOSIT':
+        addToMap(map, taxCodes.independentPension.boxes[ownIdx], asNum(d.amount), logEntry, `Pension Deposit${suffix}`);
+        break;
+
+      case 'ANNUAL_CPA_SUMMARY':
+        addToMap(map, taxCodes.rentalIncomeIsrael.boxes[ownIdx], asNum(d.rentalIncomeIsrael), logEntry, `Rental Income Israel${suffix}`);
+        addToMap(map, taxCodes.rentalIncomeAbroad.boxes[ownIdx], asNum(d.rentalIncomeAbroad), logEntry, `Rental Income Abroad${suffix}`);
+        addToMap(map, taxCodes.businessIncome.boxes[ownIdx], asNum(d.businessIncome), logEntry, `Business Income${suffix}`);
         break;
 
       default:

@@ -9,6 +9,8 @@ export const DocumentClassificationSchema = z.object({
       'FORM_867',
       'FORM_856',
       'LIFE_INSURANCE',
+      'PENSION_DEPOSIT',
+      'ANNUAL_CPA_SUMMARY',
       'DONATION_RECEIPT',
       'CONSULTANT_INVOICE',
       'TEUDAT_ZEHUT',
@@ -79,6 +81,8 @@ export const Form867Schema = z.object({
   interestTaxWithheld: z.number().default(0).describe('Tax withheld on interest (Box 043)'),
   dividend15: z.number().default(0).describe('Dividend income at 15% rate'),
   dividend20: z.number().default(0).describe('Dividend income at 20% rate'),
+  foreignIncome: z.number().default(0).describe('Foreign income (dividends/capital gains)'),
+  foreignTaxWithheld: z.number().default(0).describe('Tax withheld abroad'),
   pficFlag: z.boolean().default(false),
   calculationLog: z.array(z.string()).default([]),
 });
@@ -122,3 +126,30 @@ export const LifeInsuranceSchema = z.object({
 });
 
 export type LifeInsurance = z.infer<typeof LifeInsuranceSchema>;
+
+// ── Pension Deposit ─────────────────────────────────────────────────────────
+
+export const PensionDepositSchema = z.object({
+  ownershipType: z.enum(['SHARED', 'MAIN', 'SECONDARY']),
+  providerName: z.string(),
+  year: z.number(),
+  amount: z.number().default(0),
+  calculationLog: z.array(z.string()).default([]),
+});
+
+export type PensionDeposit = z.infer<typeof PensionDepositSchema>;
+
+// ── Annual CPA Summary ──────────────────────────────────────────────────────
+
+export const AnnualSummarySchema = z.object({
+  ownershipType: z.enum(['SHARED', 'MAIN', 'SECONDARY']),
+  providerName: z.string(),
+  year: z.number(),
+  rentalIncomeIsrael: z.number().default(0),
+  rentalIncomeAbroad: z.number().default(0),
+  businessIncome: z.number().default(0),
+  calculationLog: z.array(z.string()).default([]),
+});
+
+export type AnnualSummary = z.infer<typeof AnnualSummarySchema>;
+

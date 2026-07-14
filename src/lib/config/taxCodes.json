@@ -126,5 +126,53 @@
       "112",
       "113"
     ]
+  },
+  "rentalIncomeIsrael": {
+    "description": "Rental Income Israel (10%)",
+    "boxes": [
+      "222",
+      "284",
+      "344"
+    ]
+  },
+  "rentalIncomeAbroad": {
+    "description": "Rental Income Abroad (15%)",
+    "boxes": [
+      "225",
+      "285",
+      "345"
+    ]
+  },
+  "independentPension": {
+    "description": "Independent Pension / Provident Fund",
+    "boxes": [
+      null,
+      "135",
+      "180"
+    ]
+  },
+  "foreignIncome": {
+    "description": "Foreign Income",
+    "boxes": [
+      "290",
+      "290",
+      "290"
+    ]
+  },
+  "foreignTaxWithheld": {
+    "description": "Foreign Tax Withheld",
+    "boxes": [
+      "044",
+      "044",
+      "044"
+    ]
+  },
+  "businessIncome": {
+    "description": "Business Income",
+    "boxes": [
+      "150",
+      "150",
+      "170"
+    ]
   }
 }

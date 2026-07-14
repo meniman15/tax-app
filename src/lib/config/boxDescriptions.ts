@@ -70,4 +70,25 @@ export const BOX_DESCRIPTIONS: Record<
   '081': { he: 'פרמיה לביטוח חיים לקצבה - בן/בת זוג', en: 'Life Insurance Premium (Spouse)', category: 'deductions' },
   '112': { he: 'ביטוח אובדן כושר עבודה - בן הזוג הרשום', en: 'Loss of Working Capacity (Main)', category: 'deductions' },
   '113': { he: 'ביטוח אובדן כושר עבודה - בן/בת זוג', en: 'Loss of Working Capacity (Spouse)', category: 'deductions' },
+
+  '222': { he: 'הכנסה משכר דירה בישראל (מסלול 10%) - נישום', en: 'Rental Income Israel (Main)', category: 'income' },
+  '284': { he: 'הכנסה משכר דירה בישראל (מסלול 10%) - בן/בת זוג', en: 'Rental Income Israel (Spouse)', category: 'income' },
+  '344': { he: 'הכנסה משכר דירה בישראל (מסלול 10%) - משותף', en: 'Rental Income Israel (Shared)', category: 'income' },
+
+  '225': { he: 'הכנסה משכר דירה בחו"ל (מסלול 15%) - נישום', en: 'Rental Income Abroad (Main)', category: 'income' },
+  '285': { he: 'הכנסה משכר דירה בחו"ל (מסלול 15%) - בן/בת זוג', en: 'Rental Income Abroad (Spouse)', category: 'income' },
+  '345': { he: 'הכנסה משכר דירה בחו"ל (מסלול 15%) - משותף', en: 'Rental Income Abroad (Shared)', category: 'income' },
+
+  '135': { he: 'הפקדות עצמאיות לקופת גמל/פנסיה - בן הזוג הרשום', en: 'Independent Pension Deposit (Main)', category: 'deductions' },
+  '180': { he: 'הפקדות עצמאיות לקופת גמל/פנסיה - בן/בת זוג', en: 'Independent Pension Deposit (Spouse)', category: 'deductions' },
+
+  '290': { he: 'הכנסות מחוץ לארץ', en: 'Foreign Income', category: 'income' },
+  '044': { he: 'מס ששולם בחוץ לארץ', en: 'Foreign Tax Withheld', category: 'tax_withheld' },
+
+  '067': { he: 'זיכוי אישי (נקודות זיכוי)', en: 'Personal Credit Points', category: 'deductions' },
+
+
+  '150': { he: 'הכנסה מעסק או משלח יד - בן הזוג הרשום / משותף', en: 'Business Income (Main)', category: 'income' },
+  '170': { he: 'הכנסה מעסק או משלח יד - בן/בת זוג', en: 'Business Income (Spouse)', category: 'income' },
+
 };

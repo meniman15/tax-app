@@ -8,6 +8,8 @@ import {
   DonationReceiptSchema,
   ConsultantInvoiceSchema,
   LifeInsuranceSchema,
+  PensionDepositSchema,
+  AnnualSummarySchema,
   type DocumentClassification,
   type Form106,
   type Form867,
@@ -131,9 +133,37 @@ const LifeInsuranceResponseSchema: Schema = {
   required: ['ownershipType', 'insuranceCompany', 'year', 'lifeInsurancePremium', 'lossOfWorkingCapacityPremium', 'calculationLog'],
 };
 
+
+const PensionDepositResponseSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    ownershipType: { type: Type.STRING },
+    providerName: { type: Type.STRING },
+    year: { type: Type.NUMBER },
+    amount: { type: Type.NUMBER },
+    calculationLog: { type: Type.ARRAY, items: { type: Type.STRING } },
+  },
+  required: ['ownershipType', 'providerName', 'year', 'amount', 'calculationLog'],
+};
+
+const AnnualSummaryResponseSchema: Schema = {
+  type: Type.OBJECT,
+  properties: {
+    ownershipType: { type: Type.STRING },
+    providerName: { type: Type.STRING },
+    year: { type: Type.NUMBER },
+    rentalIncomeIsrael: { type: Type.NUMBER },
+    rentalIncomeAbroad: { type: Type.NUMBER },
+    businessIncome: { type: Type.NUMBER },
+    calculationLog: { type: Type.ARRAY, items: { type: Type.STRING } },
+  },
+  required: ['ownershipType', 'providerName', 'year', 'rentalIncomeIsrael', 'rentalIncomeAbroad', 'businessIncome', 'calculationLog'],
+};
+
 // ── Prompts ─────────────────────────────────────────────────────────────────
 
-const CLASSIFICATION_PROMPT = `You are an Israeli tax document classifier. Classify this document into EXACTLY one enum: ['FORM_106', 'FORM_867', 'FORM_856', 'DONATION_RECEIPT', 'CONSULTANT_INVOICE', 'LIFE_INSURANCE', 'UNKNOWN'], TEUDAT_ZEHUT, US_FORM_1099, UNKNOWN.
+
+const CLASSIFICATION_PROMPT = `You are an Israeli tax document classifier. Classify this document into EXACTLY one enum: ['FORM_106', 'FORM_867', 'FORM_856', 'DONATION_RECEIPT', 'CONSULTANT_INVOICE', 'LIFE_INSURANCE', 'PENSION_DEPOSIT', 'ANNUAL_CPA_SUMMARY', 'UNKNOWN'], TEUDAT_ZEHUT, US_FORM_1099, UNKNOWN.
 
 Rules:
 - FORM_106: Annual employer tax certificate (תיאום מס / טופס 106). Contains salary, tax withheld, employer name.
@@ -211,6 +241,22 @@ const LIFE_INSURANCE_PROMPT = `Extract the financial data from this Life Insuran
 
 // ── Schema & prompt mapping ─────────────────────────────────────────────────
 
+const PENSION_DEPOSIT_PROMPT = `Extract the financial data from this independent provident fund / pension deposit certificate (אישור הפקדה לקופת גמל / קרן פנסיה).
+1. ownershipType: If one person, classify as MAIN.
+2. providerName: The name of the pension company (e.g. "אלטשולר שחם", "הראל").
+3. year: The tax year.
+4. amount: The total independent deposits made (הפקדות במעמד עצמאי). Do NOT include employer deposits.
+5. Provide a calculationLog.`;
+
+const ANNUAL_CPA_SUMMARY_PROMPT = `Extract the financial data from this annual CPA summary or tax income report (ריכוז הכנסות / דוח רואה חשבון).
+1. ownershipType: MAIN or SHARED.
+2. providerName: The name of the CPA or the business name.
+3. year: The tax year.
+4. rentalIncomeIsrael: Total gross rental income in Israel (usually 10% track).
+5. rentalIncomeAbroad: Total gross rental income from abroad (usually 15% track).
+6. businessIncome: Total net business income (הכנסה חייבת מעסק).
+7. Provide a calculationLog.`;
+
 const EXTRACTION_CONFIG: Record<
   string,
   { prompt: string; responseSchema: Schema; zodSchema: { parse: (data: unknown) => unknown } }
@@ -220,6 +266,8 @@ const EXTRACTION_CONFIG: Record<
   DONATION_RECEIPT: { prompt: DONATION_PROMPT, responseSchema: DonationReceiptResponseSchema, zodSchema: DonationReceiptSchema },
   CONSULTANT_INVOICE: { prompt: CONSULTANT_PROMPT, responseSchema: ConsultantInvoiceResponseSchema, zodSchema: ConsultantInvoiceSchema },
   LIFE_INSURANCE: { prompt: LIFE_INSURANCE_PROMPT, responseSchema: LifeInsuranceResponseSchema, zodSchema: LifeInsuranceSchema },
+  PENSION_DEPOSIT: { prompt: PENSION_DEPOSIT_PROMPT, responseSchema: PensionDepositSchema, zodSchema: PensionDepositSchema },
+  ANNUAL_CPA_SUMMARY: { prompt: ANNUAL_CPA_SUMMARY_PROMPT, responseSchema: AnnualSummarySchema, zodSchema: AnnualSummarySchema },
 };
 
 // ── Main extraction function ────────────────────────────────────────────────
