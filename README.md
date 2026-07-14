@@ -1,12 +1,12 @@
 # Israeli Tax Aggregation App
 
-A modern web application built with Next.js that automates the extraction and aggregation of Israeli tax documents using AI (Google Gemini 1.5 Flash).
+A modern web application built with Next.js that automates the extraction and aggregation of Israeli tax documents using AI (Google Gemini 3.1 Flash lite).
 
 The app allows users to upload various financial documents (Form 106, Form 867, Donation Receipts), uses AI to extract structured financial data, and aggregates the results into a unified view mirroring the Israeli Form 1301.
 
 ## Features
 
-- **AI-Powered Extraction**: Leverages Google's Gemini 1.5 Flash model with Structured Outputs to parse complex, unstructured Hebrew PDF tax forms with extreme precision.
+- **AI-Powered Extraction**: Leverages Google's Gemini 3.1 Flash lite model with Structured Outputs to parse complex, unstructured Hebrew PDF tax forms with extreme precision.
 - **Form Support**:
   - **Form 106 (טופס 106)**: Salary, Bituh Leumi, Health Tax, Pension deductions, Keren Hishtalmut, etc.
   - **Form 867 (טופס 867)**: Capital Gains (20%/25%), Dividends (15%/20%), Interest, Real Estate, and complex Tax Withheld aggregation.

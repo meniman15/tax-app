@@ -60,9 +60,9 @@ function getBadgeLabel(cls?: string): string {
 }
 
 const CATEGORY_META: Record<string, { label: string; dotClass: string }> = {
-  salary:     { label: 'Salary & Employment', dotClass: 'dot-salary' },
-  capital:    { label: 'Capital Gains & Losses', dotClass: 'dot-capital' },
-  passive:    { label: 'Passive Income (Interest & Dividends)', dotClass: 'dot-passive' },
+  salary: { label: 'Salary & Employment', dotClass: 'dot-salary' },
+  capital: { label: 'Capital Gains & Losses', dotClass: 'dot-capital' },
+  passive: { label: 'Passive Income (Interest & Dividends)', dotClass: 'dot-passive' },
   deductions: { label: 'Deductions & Donations', dotClass: 'dot-deductions' },
   income: { label: 'Business & Rental Income', dotClass: 'dot-salary' },
   tax_withheld: { label: 'Taxes Withheld', dotClass: 'dot-capital' },
@@ -112,13 +112,17 @@ export default function TaxAssistantPage() {
   const [showAiReasoning, setShowAiReasoning] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  
-  useEffect(() => {
+  function computeCreditPoints(details: typeof personalDetails) {
     let points = 2.25;
-    if (personalDetails.gender === 'F') points += 0.5;
-    points += personalDetails.childrenCount * 1.5;
-    const creditValue = points * 2928; // 2024/2025 value approx 244/mo * 12
+    if (details.gender === 'F') points += 0.5;
+    if (details.maritalStatus === 'MARRIED') points += 0.5;
+    points += details.childrenCount * 1.5;
+    const creditValue = Math.round(points * 2976); // 2025: ₪248/month × 12
+    return { points, creditValue };
+  }
 
+  useEffect(() => {
+    const { points, creditValue } = computeCreditPoints(personalDetails);
     setTaxMap(prev => ({
       ...prev,
       '067': {
@@ -165,13 +169,13 @@ export default function TaxAssistantPage() {
     setError(null);
 
     const filesToProcess = files.filter(f => f.status !== 'done');
-    
+
     // Mark only pending files as processing
     setFiles(prev => prev.map(f => f.status !== 'done' ? { ...f, status: 'processing' } : f));
 
     try {
       let newResults: any[] = [];
-      
+
       if (filesToProcess.length > 0) {
         const formData = new FormData();
         filesToProcess.forEach(f => formData.append('files', f.file));
@@ -186,7 +190,7 @@ export default function TaxAssistantPage() {
       }
 
       let newResultIndex = 0;
-      
+
       // Update files with results
       setFiles(prev => prev.map(f => {
         if (f.status === 'done') return f;
@@ -226,6 +230,9 @@ export default function TaxAssistantPage() {
         throw new Error(err.error || 'Aggregation failed');
       }
       const { taxMap: map, aggregationLog: log } = await aggRes.json();
+      // Re-inject personal credit points so aggregation doesn't overwrite them
+      const { points, creditValue } = computeCreditPoints(personalDetails);
+      map['067'] = { value: creditValue, description: `Personal Credit Points (${points} pts)` };
       setTaxMap(map);
       setAggregationLog(log || []);
       setStep(2);
@@ -428,14 +435,14 @@ export default function TaxAssistantPage() {
             </div>
           </div>
 
-          
+
           {/* Personal Details Panel */}
-          <div className="tax-map-section" style={{ backgroundColor: 'rgba(0, 209, 255, 0.05)', borderColor: 'rgba(0, 209, 255, 0.2)' }}>
+          <div className="tax-map-section" style={{ borderColor: 'rgba(0, 209, 255, 0.2)' }}>
             <div className="section-header">
               <span className="section-dot dot-salary" style={{ backgroundColor: '#00D1FF' }} />
               <h3>Personal Details (Credit Points)</h3>
             </div>
-            <div className="flex gap-12" style={{ flexWrap: 'wrap', marginTop: 12 }}>
+            <div className="flex gap-12" style={{ flexWrap: 'wrap', marginTop: 12, marginBottom: 24 }}>
               <div className="flex flex-col" style={{ gap: 4 }}>
                 <label style={{ fontSize: '0.85rem', color: '#aaa' }}>Gender</label>
                 <select className="value-input" value={personalDetails.gender} onChange={e => setPersonalDetails(p => ({ ...p, gender: e.target.value }))} style={{ width: 120 }}>
@@ -597,7 +604,7 @@ export default function TaxAssistantPage() {
               </div>
               <button onClick={() => setIsLogModalOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer', alignSelf: 'flex-start' }}>&times;</button>
             </div>
-            
+
             {aggregationLog.length === 0 ? (
               <p className="text-muted">No calculations recorded.</p>
             ) : (
