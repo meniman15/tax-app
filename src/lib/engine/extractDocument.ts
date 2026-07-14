@@ -89,6 +89,8 @@ const Form867ResponseSchema: Schema = {
     interestTaxWithheld: { type: Type.NUMBER },
     dividend15: { type: Type.NUMBER },
     dividend20: { type: Type.NUMBER },
+    foreignIncome: { type: Type.NUMBER },
+    foreignTaxWithheld: { type: Type.NUMBER },
     pficFlag: { type: Type.BOOLEAN },
     calculationLog: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Provide a sentence-by-sentence calculation log explaining your math step-by-step, prefixed with the account owner. E.g. 'Account Owner: SHARED - Box 166 added 12505 from page 1 for 20% capital gains tax. Added 1902 for oil taxes, so far total Box 166 - 13507'." },
   },
