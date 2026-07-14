@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { BOX_DESCRIPTIONS } from '@/lib/config/boxDescriptions';
+import { calculateEstimatedReturn } from '@/lib/engine/taxReturnCalculator';
 
 /* ── Types ─────────────────────────────────────────────────── */
 interface UploadedFile {
@@ -525,6 +526,69 @@ export default function TaxAssistantPage() {
               </div>
             );
           })}
+
+          {/* Tax Estimate Summary */}
+          {formType === 'IL' && (() => {
+            const estimate = calculateEstimatedReturn(taxMap);
+            return (
+              <div className="tax-map-section" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <div className="section-header">
+                  <span className="section-dot" style={{ backgroundColor: estimate.refundOrDue >= 0 ? '#00e676' : '#ff4d4d' }} />
+                  <h3>Estimated Tax Summary (2025)</h3>
+                </div>
+                
+                <div className="flex" style={{ gap: 24, flexWrap: 'wrap', marginTop: 16 }}>
+                  <div style={{ flex: 1, minWidth: 250 }}>
+                    <table style={{ width: '100%', fontSize: '0.95rem' }}>
+                      <tbody>
+                        <tr>
+                          <td style={{ padding: '4px 0', color: '#aaa' }}>Gross Income:</td>
+                          <td style={{ padding: '4px 0', textAlign: 'right' }}>₪{formatNumber(estimate.grossIncome)}</td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '4px 0', color: '#aaa' }}>Gross Tax:</td>
+                          <td style={{ padding: '4px 0', textAlign: 'right' }}>₪{formatNumber(estimate.grossTax)}</td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '4px 0', color: '#aaa' }}>Credit Points Value:</td>
+                          <td style={{ padding: '4px 0', textAlign: 'right', color: '#00D1FF' }}>- ₪{formatNumber(estimate.creditPointsValue)}</td>
+                        </tr>
+                        {estimate.donationCredit > 0 && (
+                          <tr>
+                            <td style={{ padding: '4px 0', color: '#aaa' }}>Donation Credit (35%):</td>
+                            <td style={{ padding: '4px 0', textAlign: 'right', color: '#00D1FF' }}>- ₪{formatNumber(estimate.donationCredit)}</td>
+                          </tr>
+                        )}
+                        <tr>
+                          <td colSpan={2} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 8 }}></td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '8px 0 4px', fontWeight: 600 }}>Net Tax Liability:</td>
+                          <td style={{ padding: '8px 0 4px', textAlign: 'right', fontWeight: 600 }}>₪{formatNumber(estimate.netTaxLiability)}</td>
+                        </tr>
+                        <tr>
+                          <td style={{ padding: '4px 0', color: '#aaa' }}>Total Tax Withheld:</td>
+                          <td style={{ padding: '4px 0', textAlign: 'right' }}>₪{formatNumber(estimate.totalTaxWithheld)}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div style={{ flex: 1, minWidth: 250, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 12, padding: 24 }}>
+                    <div style={{ fontSize: '1.1rem', color: '#aaa', marginBottom: 8 }}>
+                      {estimate.refundOrDue >= 0 ? 'Estimated Refund' : 'Estimated Tax Due'}
+                    </div>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 800, color: estimate.refundOrDue >= 0 ? '#00e676' : '#ff4d4d' }}>
+                      ₪{formatNumber(Math.abs(estimate.refundOrDue))}
+                    </div>
+                    <div style={{ fontSize: '0.8rem', color: '#888', marginTop: 12, textAlign: 'center', maxWidth: 200 }}>
+                      *Simplified calculation for standard salaried workers.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Actions */}
           <div className="flex items-center justify-between mt-24 gap-12" style={{ flexWrap: 'wrap' }}>
