@@ -126,6 +126,12 @@ export function aggregateToTaxMap(
         addToMap(map, taxCodes.foreignTaxWithheld.boxes[ownIdx], asNum(d.foreignTaxWithheld), logEntry, `Foreign Tax Withheld${suffix}`);
         break;
 
+      
+      case 'US_FORM_1099':
+        addToMap(map, taxCodes.foreignIncome.boxes[ownIdx], asNum(d.foreignIncome), logEntry, `Foreign Income${suffix}`);
+        addToMap(map, taxCodes.foreignTaxWithheld.boxes[ownIdx], asNum(d.foreignTaxWithheld), logEntry, `Foreign Tax Withheld${suffix}`);
+        break;
+
       case 'FORM_856':
         addToMap(map, taxCodes.dividend15.boxes[ownIdx], asNum(d.dividend15), logEntry, `ESOP Dividend (15%)${suffix}`);
         addToMap(map, taxCodes.capitalGains25.boxes[ownIdx], asNum(d.capitalGains25), logEntry, `ESOP Gains (25%)${suffix}`);

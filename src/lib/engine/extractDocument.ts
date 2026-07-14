@@ -163,7 +163,7 @@ const AnnualSummaryResponseSchema: Schema = {
 // ── Prompts ─────────────────────────────────────────────────────────────────
 
 
-const CLASSIFICATION_PROMPT = `You are an Israeli tax document classifier. Classify this document into EXACTLY one enum: ['FORM_106', 'FORM_867', 'FORM_856', 'DONATION_RECEIPT', 'CONSULTANT_INVOICE', 'LIFE_INSURANCE', 'PENSION_DEPOSIT', 'ANNUAL_CPA_SUMMARY', 'UNKNOWN'], TEUDAT_ZEHUT, US_FORM_1099, UNKNOWN.
+const CLASSIFICATION_PROMPT = `You are an Israeli tax document classifier. Classify this document into EXACTLY one enum: ['FORM_106', 'FORM_867', 'FORM_856', 'DONATION_RECEIPT', 'CONSULTANT_INVOICE', 'LIFE_INSURANCE', 'PENSION_DEPOSIT', 'ANNUAL_CPA_SUMMARY', 'US_FORM_1099', 'UNKNOWN']
 
 Rules:
 - FORM_106: Annual employer tax certificate (תיאום מס / טופס 106). Contains salary, tax withheld, employer name.
@@ -257,6 +257,16 @@ const ANNUAL_CPA_SUMMARY_PROMPT = `Extract the financial data from this annual C
 6. businessIncome: Total net business income (הכנסה חייבת מעסק).
 7. Provide a calculationLog.`;
 
+
+const US_FORM_1099_PROMPT = `Extract the financial data from this US Form 1099 Consolidated Tax Statement (e.g. Morgan Stanley, E*TRADE, Fidelity).
+CRITICAL RULES:
+1. ownershipType: MAIN or SHARED.
+2. bankName: The broker name (e.g. "E*TRADE", "Fidelity", "Morgan Stanley").
+3. foreignIncome: SUM the total Ordinary Dividends, total Interest Income, and total Proceeds/Gains. ALL income on this form is foreign income (Box 290). DO NOT use dividend15, capitalGains25, etc.
+4. foreignTaxWithheld: The total Federal Income Tax Withheld.
+5. All other fields (taxWithheld, dividend20, capitalGains20, etc.) MUST be 0.
+6. Provide a calculationLog.`;
+
 const EXTRACTION_CONFIG: Record<
   string,
   { prompt: string; responseSchema: Schema; zodSchema: { parse: (data: unknown) => unknown } }
@@ -268,6 +278,7 @@ const EXTRACTION_CONFIG: Record<
   LIFE_INSURANCE: { prompt: LIFE_INSURANCE_PROMPT, responseSchema: LifeInsuranceResponseSchema, zodSchema: LifeInsuranceSchema },
   PENSION_DEPOSIT: { prompt: PENSION_DEPOSIT_PROMPT, responseSchema: PensionDepositSchema, zodSchema: PensionDepositSchema },
   ANNUAL_CPA_SUMMARY: { prompt: ANNUAL_CPA_SUMMARY_PROMPT, responseSchema: AnnualSummarySchema, zodSchema: AnnualSummarySchema },
+  US_FORM_1099: { prompt: US_FORM_1099_PROMPT, responseSchema: Form867ResponseSchema, zodSchema: Form867Schema },
 };
 
 // ── Main extraction function ────────────────────────────────────────────────
