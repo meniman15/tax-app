@@ -63,6 +63,8 @@ const CATEGORY_META: Record<string, { label: string; dotClass: string }> = {
   capital:    { label: 'Capital Gains & Losses', dotClass: 'dot-capital' },
   passive:    { label: 'Passive Income (Interest & Dividends)', dotClass: 'dot-passive' },
   deductions: { label: 'Deductions & Donations', dotClass: 'dot-deductions' },
+  income: { label: 'Business & Rental Income', dotClass: 'dot-salary' },
+  tax_withheld: { label: 'Taxes Withheld', dotClass: 'dot-capital' },
 };
 
 /* ── Icons ─────────────────────────────────────────────────── */
@@ -259,7 +261,7 @@ export default function TaxAssistantPage() {
     {}
   );
 
-  const categories = ['salary', 'capital', 'passive', 'deductions', 'other'];
+  const categories = ['salary', 'income', 'capital', 'passive', 'deductions', 'tax_withheld', 'other'];
 
   /* ── Render ─────────────────────────────────────────────────── */
   return (
