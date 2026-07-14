@@ -1,0 +1,8 @@
+{
+  "capitalLosses": { "description": "Capital Losses (carried forward)", "box": "166" },
+  "salesTurnover": { "description": "Sales Turnover", "box": "256" },
+  "capitalGainsTax": { "description": "Tax Withheld on Capital Gains & Dividends", "box": "040" },
+  "interestTax": { "description": "Tax Withheld on Interest", "box": "043" },
+  "taxPrep": { "description": "Tax Prep Expenses", "box": "DEDUCTION_TAX_PREP" },
+  "salaryTax": { "description": "Tax Withheld from Salary", "box": "042" }
+}

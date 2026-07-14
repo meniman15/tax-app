@@ -1,0 +1,114 @@
+{
+  "salary": {
+    "description": "Gross Salary",
+    "boxes": [
+      null,
+      "158",
+      "172"
+    ]
+  },
+  "bituachLeumiIncome": {
+    "description": "Income from Bituach Leumi",
+    "boxes": [
+      null,
+      "194",
+      "196"
+    ]
+  },
+  "kerenHishtalmut": {
+    "description": "Keren Hishtalmut Base Salary",
+    "boxes": [
+      null,
+      "218",
+      "219"
+    ]
+  },
+  "pensionAllowance": {
+    "description": "Pension/Kupat Gemel Allowance",
+    "boxes": [
+      null,
+      "248",
+      "249"
+    ]
+  },
+  "pensionInsured": {
+    "description": "Pension Insured Salary",
+    "boxes": [
+      null,
+      "244",
+      "245"
+    ]
+  },
+  "pensionDeduction": {
+    "description": "Pension Employee Deduction",
+    "boxes": [
+      null,
+      "045",
+      "086"
+    ]
+  },
+  "recreationPay": {
+    "description": "Recreation Pay Deduction",
+    "boxes": [
+      null,
+      "011",
+      "012"
+    ]
+  },
+  "capitalGains25": {
+    "description": "Capital Gains / Dividend (25%)",
+    "boxes": [
+      "141",
+      "241",
+      "341"
+    ]
+  },
+  "interest15": {
+    "description": "Interest Income (15%) - deposits/savings",
+    "boxes": [
+      "078",
+      "217",
+      "317"
+    ]
+  },
+  "interest20": {
+    "description": "Interest Income (20%) - securities",
+    "boxes": [
+      "126",
+      "226",
+      "326"
+    ]
+  },
+  "interest25": {
+    "description": "Interest Income (25%) - securities",
+    "boxes": [
+      "157",
+      "257",
+      "357"
+    ]
+  },
+  "dividend15": {
+    "description": "Dividend / Interest Income (15%) - approved enterprise",
+    "boxes": [
+      "060",
+      "211",
+      "311"
+    ]
+  },
+  "dividend20": {
+    "description": "Dividend Income (20%)",
+    "boxes": [
+      "173",
+      "275",
+      "325"
+    ]
+  },
+  "donations": {
+    "description": "Section 46 Donations",
+    "boxes": [
+      null,
+      "037",
+      "237"
+    ]
+  }
+}
