@@ -11,12 +11,12 @@ export interface TaxEstimate {
 }
 
 const BRACKETS_2025 = [
-  { upTo: 101280, rate: 0.10 },
-  { upTo: 145200, rate: 0.14 },
-  { upTo: 232200, rate: 0.20 },
-  { upTo: 325440, rate: 0.31 },
-  { upTo: 674400, rate: 0.35 },
-  { upTo: 864000, rate: 0.47 }, // 47% + 3% surtax above 864k roughly
+  { upTo: 84120, rate: 0.10 },
+  { upTo: 120720, rate: 0.14 },
+  { upTo: 193800, rate: 0.20 },
+  { upTo: 274440, rate: 0.31 },
+  { upTo: 560280, rate: 0.35 },
+  { upTo: 721560, rate: 0.47 }, // 47% + 3% surtax above 721,560
   { upTo: Infinity, rate: 0.50 }
 ];
 
