@@ -175,9 +175,10 @@ export default function TaxAssistantPage() {
     setError(null);
 
     const filesToProcess = files.filter(f => f.status !== 'done');
+    const processingIds = new Set(filesToProcess.map(f => f.id));
 
     // Mark only pending files as processing
-    setFiles(prev => prev.map(f => f.status !== 'done' ? { ...f, status: 'processing' } : f));
+    setFiles(prev => prev.map(f => processingIds.has(f.id) ? { ...f, status: 'processing' } : f));
 
     try {
       let newResults: any[] = [];
@@ -199,8 +200,10 @@ export default function TaxAssistantPage() {
 
       // Update files with results
       setFiles(prev => prev.map(f => {
-        if (f.status === 'done') return f;
+        if (!processingIds.has(f.id)) return f;
         const result = newResults[newResultIndex++];
+        if (!result) return f;
+        
         const isError = result.classification?.documentType === 'ERROR';
         return {
           ...f,

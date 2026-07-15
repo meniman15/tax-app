@@ -227,11 +227,14 @@ CRUCIAL: You MUST provide a 'calculationLog' explaining your math step-by-step. 
 All monetary values in ILS. Return 0 for any field not found.`;
 
 const DONATION_PROMPT = `You are extracting data from an Israeli donation receipt (קבלה לתרומה / קבלה ממוסד ציבורי).
-1. Extract the charityName (שם העמותה).
-2. Extract the receiptNumber (מספר קבלה) and date.
-3. Extract the total donation amount. Look for "סך הכל", "סה״כ", or the main receipt amount.
-4. Determine if it explicitly states it is a Section 46 approved charity (מוכר לפי סעיף 46 לפקודת מס הכנסה).
-5. Provide a calculationLog explaining your extraction.
+CRITICAL RULES:
+1. Scan the ENTIRE document. There may be MULTIPLE donation receipts on different pages or the same page.
+2. If there are multiple receipts, you MUST SUM all the donation amounts.
+3. Extract the charityName (שם העמותה). If multiple, write the primary one or "Multiple Charities".
+4. Extract the receiptNumber (מספר קבלה) and date. If multiple, write "Multiple".
+5. amount: Provide the TOTAL sum of all donation amounts found in the document.
+6. isSection46Approved: Determine if it explicitly states it is a Section 46 approved charity (מוכר לפי סעיף 46 לפקודת מס הכנסה). If multiple, assume true if at least one is approved.
+7. calculationLog: Provide a detailed calculation log listing EVERY receipt you found, its amount, and how you summed them up to get the final amount.
 All monetary values in ILS.`;
 
 const CONSULTANT_PROMPT = `You are extracting data from a consultant/accountant invoice (חשבונית).
