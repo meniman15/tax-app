@@ -5,6 +5,7 @@ export interface TaxEstimate {
   grossTax: number;
   creditPointsValue: number;
   donationCredit: number;
+  pensionCredit: number;
   netTaxLiability: number;
   totalTaxWithheld: number;
   refundOrDue: number; // Positive = Refund, Negative = Due
@@ -47,14 +48,18 @@ export function calculateEstimatedReturn(taxMap: TaxMap): TaxEstimate {
   const donation237 = taxMap['237']?.value || 0;
   const donationCredit = (donation037 + donation237) * 0.35;
 
-  // 5. Net Tax Liability
-  let netTaxLiability = grossTax - creditPointsValue - donationCredit;
+  // 5. Pension Credit (Box 045 - 35% capped at 2852)
+  const pension045 = taxMap['045']?.value || 0;
+  const pensionCredit = Math.min(pension045 * 0.35, 2852);
+
+  // 6. Net Tax Liability
+  let netTaxLiability = grossTax - creditPointsValue - donationCredit - pensionCredit;
   if (netTaxLiability < 0) netTaxLiability = 0;
 
-  // 6. Total Tax Withheld (Box 042)
+  // 7. Total Tax Withheld (Box 042)
   const taxWithheld042 = taxMap['042']?.value || 0;
 
-  // 7. Refund or Due
+  // 8. Refund or Due
   const refundOrDue = taxWithheld042 - netTaxLiability;
 
   return {
@@ -62,6 +67,7 @@ export function calculateEstimatedReturn(taxMap: TaxMap): TaxEstimate {
     grossTax,
     creditPointsValue,
     donationCredit,
+    pensionCredit,
     netTaxLiability,
     totalTaxWithheld: taxWithheld042,
     refundOrDue

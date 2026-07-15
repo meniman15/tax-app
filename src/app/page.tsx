@@ -573,6 +573,12 @@ export default function TaxAssistantPage() {
                             <td style={{ padding: '4px 0', textAlign: 'right', color: '#00D1FF' }}>- ₪{formatNumber(estimate.donationCredit)}</td>
                           </tr>
                         )}
+                        {estimate.pensionCredit > 0 && (
+                          <tr>
+                            <td style={{ padding: '4px 0', color: '#aaa' }}>Pension Credit (35% limit):</td>
+                            <td style={{ padding: '4px 0', textAlign: 'right', color: '#00D1FF' }}>- ₪{formatNumber(estimate.pensionCredit)}</td>
+                          </tr>
+                        )}
                         <tr>
                           <td colSpan={2} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: 8 }}></td>
                         </tr>
