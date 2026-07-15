@@ -101,14 +101,23 @@ const Form867ResponseSchema: Schema = {
 const DonationReceiptResponseSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    charityName: { type: Type.STRING },
-    receiptNumber: { type: Type.STRING },
-    date: { type: Type.STRING },
-    amount: { type: Type.NUMBER },
-    isSection46Approved: { type: Type.BOOLEAN },
+    receipts: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          charityName: { type: Type.STRING },
+          receiptNumber: { type: Type.STRING },
+          date: { type: Type.STRING },
+          amount: { type: Type.NUMBER },
+          isSection46Approved: { type: Type.BOOLEAN },
+        },
+        required: ['charityName', 'receiptNumber', 'date', 'amount', 'isSection46Approved'],
+      }
+    },
     calculationLog: { type: Type.ARRAY, items: { type: Type.STRING } },
   },
-  required: ['charityName', 'receiptNumber', 'date', 'amount', 'isSection46Approved'],
+  required: ['receipts'],
 };
 
 const ConsultantInvoiceResponseSchema: Schema = {
@@ -229,12 +238,12 @@ All monetary values in ILS. Return 0 for any field not found.`;
 const DONATION_PROMPT = `You are extracting data from an Israeli donation receipt (קבלה לתרומה / קבלה ממוסד ציבורי).
 CRITICAL RULES:
 1. Scan the ENTIRE document. There may be MULTIPLE donation receipts on different pages or the same page.
-2. If there are multiple receipts, you MUST SUM all the donation amounts.
-3. Extract the charityName (שם העמותה). If multiple, write the primary one or "Multiple Charities".
-4. Extract the receiptNumber (מספר קבלה) and date. If multiple, write "Multiple".
-5. amount: Provide the TOTAL sum of all donation amounts found in the document.
-6. isSection46Approved: Determine if it explicitly states it is a Section 46 approved charity (מוכר לפי סעיף 46 לפקודת מס הכנסה). If multiple, assume true if at least one is approved.
-7. calculationLog: Provide a detailed calculation log listing EVERY receipt you found, its amount, and how you summed them up to get the final amount.
+2. For EACH receipt you find, extract it as a separate item in the receipts array.
+3. Extract the charityName (שם העמותה).
+4. Extract the receiptNumber (מספר קבלה) and date.
+5. amount: The donation amount.
+6. isSection46Approved: Determine if the specific receipt explicitly states it is a Section 46 approved charity (מוכר לפי סעיף 46 לפקודת מס הכנסה).
+7. calculationLog: Provide a brief log of how many receipts you found and any notes.
 All monetary values in ILS.`;
 
 const CONSULTANT_PROMPT = `You are extracting data from a consultant/accountant invoice (חשבונית).

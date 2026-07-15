@@ -96,11 +96,13 @@ export type Form867 = z.infer<typeof Form867Schema>;
 // ── Donation Receipt ────────────────────────────────────────────────────────
 
 export const DonationReceiptSchema = z.object({
-  charityName: z.string(),
-  receiptNumber: z.string(),
-  date: z.string(),
-  amount: z.number(),
-  isSection46Approved: z.boolean(),
+  receipts: z.array(z.object({
+    charityName: z.string(),
+    receiptNumber: z.string(),
+    date: z.string(),
+    amount: z.number(),
+    isSection46Approved: z.boolean(),
+  })),
   calculationLog: z.array(z.string()).default([]),
 });
 

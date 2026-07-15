@@ -142,9 +142,18 @@ export function aggregateToTaxMap(
         addToMap(map, taxCodes.capitalGains25.boxes[ownIdx], asNum(d.capitalGains25), logEntry, `ESOP Gains (25%)${suffix}`);
         break;
 
-      case 'DONATION_RECEIPT':
-        addToMap(map, taxCodes.donations.boxes[ownIdx], asNum(d.amount), logEntry, `Section 46 Donation${suffix}`);
+      case 'DONATION_RECEIPT': {
+        const receipts = d.receipts as unknown as Array<{ charityName: string; amount: number; isSection46Approved: boolean }>;
+        if (Array.isArray(receipts)) {
+          for (const r of receipts) {
+            if (r.isSection46Approved) {
+              const rSuffix = r.charityName ? ` - ${r.charityName}` : '';
+              addToMap(map, taxCodes.donations.boxes[ownIdx], asNum(r.amount), logEntry, `Section 46 Donation${rSuffix}`);
+            }
+          }
+        }
         break;
+      }
 
       case 'CONSULTANT_INVOICE':
         addToMap(map, taxTotals.taxPrep.box, asNum(d.amount), logEntry, `Tax Prep Expense${suffix}`);
