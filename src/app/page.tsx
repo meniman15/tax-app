@@ -201,12 +201,13 @@ export default function TaxAssistantPage() {
       setFiles(prev => prev.map(f => {
         if (f.status === 'done') return f;
         const result = newResults[newResultIndex++];
-        if (!result) return { ...f, status: 'error' as const, error: 'No result' };
+        const isError = result.classification?.documentType === 'ERROR';
         return {
           ...f,
-          status: 'done' as const,
+          status: isError ? 'error' as const : 'done' as const,
           classification: result.classification?.documentType,
           extractedData: result.data,
+          error: isError ? result.classification?.summary : undefined
         };
       }));
 
@@ -443,6 +444,18 @@ export default function TaxAssistantPage() {
               </button>
             </div>
           </div>
+
+          {/* Failed Files Alert */}
+          {files.some(f => f.status === 'error' || f.classification === 'ERROR') && (
+            <div style={{ backgroundColor: 'rgba(255, 77, 77, 0.1)', border: '1px solid rgba(255, 77, 77, 0.3)', padding: '12px 16px', borderRadius: 8, marginBottom: 24 }}>
+              <p style={{ color: '#ff4d4d', margin: 0, fontWeight: 600, fontSize: '0.9rem' }}>
+                ⚠️ Some documents failed to extract (likely due to AI rate limits).
+              </p>
+              <p style={{ color: '#ff4d4d', margin: '4px 0 0 0', fontSize: '0.85rem', opacity: 0.8 }}>
+                The tax summary below does not include data from the failed files. You can go back and retry them.
+              </p>
+            </div>
+          )}
 
 
           {/* Personal Details Panel */}
