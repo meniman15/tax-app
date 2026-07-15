@@ -19,7 +19,7 @@ The app allows users to upload various financial documents (Form 106, Form 867, 
 
 - **Frontend**: Next.js 14 App Router, React, Tailwind CSS, Lucide Icons.
 - **Backend**: Next.js API Routes (`/api/extract`, `/api/aggregate`).
-- **AI Engine**: `@google/genai` SDK using `gemini-1.5-flash` for multimodal document understanding and structured JSON extraction.
+- **AI Engine**: `@google/genai` SDK using `gemini-3.1-flash-lite` for multimodal document understanding and structured JSON extraction.
 - **Tax Engine**: Custom TypeScript engine (`taxMath.ts`) for enforcing Israeli tax aggregation rules and handling offsets/net taxes.
 
 ## Setup

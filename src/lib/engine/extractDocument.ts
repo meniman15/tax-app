@@ -24,17 +24,17 @@ export interface ExtractionResult {
   file: string;
   classification: DocumentClassification;
   data:
-    | Form106
-    | Form867
-    | DonationReceipt
-    | ConsultantInvoice
-    | null;
+  | Form106
+  | Form867
+  | DonationReceipt
+  | ConsultantInvoice
+  | null;
 }
 
 // ── Client ──────────────────────────────────────────────────────────────────
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-const MODEL = 'gemini-3.1-flash-lite';
+const MODEL = 'gemini-3-flash';
 
 // ── Structured-output schema definitions (Gemini Schema format) ─────────────
 
