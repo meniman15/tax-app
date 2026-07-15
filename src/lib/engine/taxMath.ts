@@ -147,8 +147,11 @@ export function aggregateToTaxMap(
         if (Array.isArray(receipts)) {
           for (const r of receipts) {
             const rSuffix = r.charityName ? ` - ${r.charityName}` : '';
-            const warningSuffix = r.isSection46Approved ? '' : ' (Missing Sec 46 confirmation)';
-            addToMap(map, taxCodes.donations.boxes[ownIdx], asNum(r.amount), logEntry, `Section 46 Donation${rSuffix}${warningSuffix}`);
+            if (r.isSection46Approved) {
+              addToMap(map, taxCodes.donations.boxes[ownIdx], asNum(r.amount), logEntry, `Section 46 Donation${rSuffix}`);
+            } else {
+              addToMap(map, 'DECLINED_DONATIONS', asNum(r.amount), logEntry, `Declined Donation${rSuffix} (Missing Sec 46)`);
+            }
           }
         }
         break;

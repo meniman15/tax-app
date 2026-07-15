@@ -64,6 +64,7 @@ export const BOX_DESCRIPTIONS: Record<
   // ── Deductions & Credits ─────────────────────────────────────────────
   '037': { he: 'סך תרומות מוכרות - בן הזוג הרשום', en: 'Recognized Donations (Main)', category: 'deductions' },
   '237': { he: 'סך תרומות מוכרות - בן/בת זוג', en: 'Recognized Donations (Spouse)', category: 'deductions' },
+  'DECLINED_DONATIONS': { he: 'תרומות שנדחו (ללא אישור 46)', en: 'Declined Donations (Missing Sec 46)', category: 'deductions' },
   'DEDUCTION_TAX_PREP': { he: 'הוצאות הנהלת חשבונות', en: 'Tax Preparation Expenses', category: 'deductions' },
 
   '036': { he: 'פרמיה לביטוח חיים לקצבה - בן הזוג הרשום', en: 'Life Insurance Premium (Main)', category: 'deductions' },
