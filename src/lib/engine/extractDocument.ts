@@ -34,7 +34,7 @@ export interface ExtractionResult {
 // ── Client ──────────────────────────────────────────────────────────────────
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
-const MODEL = 'gemini-3-flash';
+const MODEL = 'gemini-3.1-flash-lite';
 
 // ── Structured-output schema definitions (Gemini Schema format) ─────────────
 

@@ -112,9 +112,14 @@ export default function TaxAssistantPage() {
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [showAiReasoning, setShowAiReasoning] = useState(false);
   const [form106CreditPoints, setForm106CreditPoints] = useState<number | null>(null);
+  const [creditPointsOverride, setCreditPointsOverride] = useState<'form106' | 'manual'>('manual');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function computeCreditPoints(details: typeof personalDetails) {
+  function computeCreditPoints(details: typeof personalDetails, override: 'form106' | 'manual', base106: number | null) {
+    if (override === 'form106' && base106 != null && base106 > 0) {
+      return { points: base106, creditValue: Math.round(base106 * 2904) };
+    }
+    
     let points = 2.25;
     if (details.gender === 'F') points += 0.5;
     points += details.childrenCount * 1.5;
@@ -123,7 +128,7 @@ export default function TaxAssistantPage() {
   }
 
   useEffect(() => {
-    const { points, creditValue } = computeCreditPoints(personalDetails);
+    const { points, creditValue } = computeCreditPoints(personalDetails, creditPointsOverride, form106CreditPoints);
     setTaxMap(prev => ({
       ...prev,
       '067': {
@@ -131,7 +136,7 @@ export default function TaxAssistantPage() {
         description: `Personal Credit Points (${points} pts)`,
       }
     }));
-  }, [personalDetails]);
+  }, [personalDetails, creditPointsOverride, form106CreditPoints]);
 
   /* ── File Handling ─────────────────────────────────────────── */
   const addFiles = useCallback((newFiles: File[]) => {
@@ -232,7 +237,9 @@ export default function TaxAssistantPage() {
       }
       const { taxMap: map, aggregationLog: log, form106CreditPoints: pts } = await aggRes.json();
       // Re-inject personal credit points so aggregation doesn't overwrite them
-      const { points, creditValue } = computeCreditPoints(personalDetails);
+      setForm106CreditPoints(pts);
+      setCreditPointsOverride('form106');
+      const { points, creditValue } = computeCreditPoints(personalDetails, 'form106', pts);
       map['067'] = { value: creditValue, description: `Personal Credit Points (${points} pts)` };
       setTaxMap(map);
       setAggregationLog(log || []);
@@ -445,28 +452,35 @@ export default function TaxAssistantPage() {
               <h3>Personal Details (Credit Points)</h3>
             </div>
             {form106CreditPoints != null && form106CreditPoints > 0 && (
-              <p style={{ fontSize: '0.85rem', color: '#ffcc00', marginBottom: 12 }}>
-                ⚠️ Note: According to your Form 106, you have {form106CreditPoints} credit points.
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, backgroundColor: 'rgba(255, 204, 0, 0.1)', padding: '8px 12px', borderRadius: 8, border: '1px solid rgba(255, 204, 0, 0.3)' }}>
+                <p style={{ fontSize: '0.85rem', color: '#ffcc00', margin: 0 }}>
+                  ⚠️ According to your Form 106, you have <strong>{form106CreditPoints} credit points</strong>.
+                </p>
+                {creditPointsOverride === 'manual' && (
+                  <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '0.75rem' }} onClick={() => setCreditPointsOverride('form106')}>
+                    Use Form 106 Value
+                  </button>
+                )}
+              </div>
             )}
-            <div className="flex gap-12" style={{ flexWrap: 'wrap', marginTop: 12, marginBottom: 24 }}>
+            <div className="flex gap-12" style={{ flexWrap: 'wrap', marginTop: 12, marginBottom: 24, opacity: creditPointsOverride === 'form106' && form106CreditPoints ? 0.5 : 1 }}>
               <div className="flex flex-col" style={{ gap: 4 }}>
                 <label style={{ fontSize: '0.85rem', color: '#aaa' }}>Gender</label>
-                <select className="value-input" value={personalDetails.gender} onChange={e => setPersonalDetails(p => ({ ...p, gender: e.target.value }))} style={{ width: 120 }}>
+                <select className="value-input" value={personalDetails.gender} onChange={e => { setPersonalDetails(p => ({ ...p, gender: e.target.value })); setCreditPointsOverride('manual'); }} style={{ width: 120 }}>
                   <option value="M">Male</option>
                   <option value="F">Female</option>
                 </select>
               </div>
               <div className="flex flex-col" style={{ gap: 4 }}>
                 <label style={{ fontSize: '0.85rem', color: '#aaa' }}>Marital Status</label>
-                <select className="value-input" value={personalDetails.maritalStatus} onChange={e => setPersonalDetails(p => ({ ...p, maritalStatus: e.target.value }))} style={{ width: 140 }}>
+                <select className="value-input" value={personalDetails.maritalStatus} onChange={e => { setPersonalDetails(p => ({ ...p, maritalStatus: e.target.value })); setCreditPointsOverride('manual'); }} style={{ width: 140 }}>
                   <option value="SINGLE">Single</option>
                   <option value="MARRIED">Married</option>
                 </select>
               </div>
               <div className="flex flex-col" style={{ gap: 4 }}>
                 <label style={{ fontSize: '0.85rem', color: '#aaa' }}>Number of Children</label>
-                <input className="value-input" type="number" min="0" value={personalDetails.childrenCount} onChange={e => setPersonalDetails(p => ({ ...p, childrenCount: parseInt(e.target.value) || 0 }))} style={{ width: 120 }} />
+                <input className="value-input" type="number" min="0" value={personalDetails.childrenCount} onChange={e => { setPersonalDetails(p => ({ ...p, childrenCount: parseInt(e.target.value) || 0 })); setCreditPointsOverride('manual'); }} style={{ width: 120 }} />
               </div>
             </div>
           </div>
