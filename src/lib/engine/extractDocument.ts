@@ -41,7 +41,10 @@ const MODEL = 'gemini-3.1-flash-lite';
 const ClassificationSchema: Schema = {
   type: Type.OBJECT,
   properties: {
-    documentType: { type: Type.STRING },
+    documentType: { 
+      type: Type.STRING,
+      enum: ['FORM_106', 'FORM_867', 'FORM_856', 'DONATION_RECEIPT', 'CONSULTANT_INVOICE', 'LIFE_INSURANCE', 'PENSION_DEPOSIT', 'ANNUAL_CPA_SUMMARY', 'US_FORM_1099', 'UNKNOWN']
+    },
     confidenceScore: { type: Type.NUMBER },
     summary: { type: Type.STRING },
   },
@@ -93,6 +96,7 @@ const Form867ResponseSchema: Schema = {
     foreignIncome: { type: Type.NUMBER },
     foreignTaxWithheld: { type: Type.NUMBER },
     pficFlag: { type: Type.BOOLEAN },
+    currency: { type: Type.STRING },
     calculationLog: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Provide a sentence-by-sentence calculation log explaining your math step-by-step, prefixed with the account owner. E.g. 'Account Owner: SHARED - Box 166 added 12505 from page 1 for 20% capital gains tax. Added 1902 for oil taxes, so far total Box 166 - 13507'." },
   },
   required: ['ownershipType', 'bankName', 'year', 'taxWithheld', 'calculationLog'],
@@ -165,6 +169,7 @@ const AnnualSummaryResponseSchema: Schema = {
     ownershipType: { type: Type.STRING, description: "SHARED, MAIN, or SECONDARY" },
     year: { type: Type.NUMBER },
     businessIncome: { type: Type.NUMBER },
+    currency: { type: Type.STRING },
     calculationLog: { type: Type.ARRAY, items: { type: Type.STRING } },
   },
   required: ['ownershipType', 'year', 'businessIncome', 'calculationLog'],
@@ -178,14 +183,14 @@ const CLASSIFICATION_PROMPT = `You are an Israeli tax document classifier. Class
 Rules:
 - FORM_106: Annual employer tax certificate (תיאום מס / טופס 106). Contains salary, tax withheld, employer name.
 - FORM_867: Capital gains / passive income from a bank/broker (טופס 867).
-- FORM_856: ESOP / Employee Stock Ownership plan certificate (טופס 856).
+- FORM_856: ESOP / Employee Stock Ownership plan certificate (טופס 856 / 857). If the document says "איסופ" (ESOP Management) or "אישור שנתי על ניכוי מס הכנסה מתשלומים המחייבים ניכוי מס במקור", classify it as FORM_856. This is NOT a Form 1301.
 - DONATION_RECEIPT: A receipt for a donation made to a charity or non-profit (קבלה לתרומה / סעיף 46 / קבלה ממוסד ציבורי / עמותה).
 - CONSULTANT_INVOICE: Invoice for tax consulting or CPA services (חשבונית יעוץ מס / רואה חשבון).
 - LIFE_INSURANCE: Life insurance annual statement.
 - PENSION_DEPOSIT: Independent provident fund or pension deposit confirmation (אישור הפקדה לקופת גמל / קרן פנסיה).
 - ANNUAL_CPA_SUMMARY: Annual income summary provided by an accountant or business entity.
 - US_FORM_1099: US tax statement (1099-INT, 1099-DIV, 1099-B, etc.).
-- UNKNOWN: Cannot be classified.
+- UNKNOWN: Cannot be classified. Do not use for "אישור שנתי על ניכוי מס", those are FORM_856!
 
 Return the documentType, a confidenceScore (0-100), and a one-line summary.`;
 
@@ -228,12 +233,12 @@ CRITICAL RULES:
 5. Interest Income: Extract interest income strictly by percentage into interest15, interest20, interest25. DO NOT mix them.
 6. interestTaxWithheld: tax withheld specifically on interest (box 043). Extract the FINAL NET tax after any offsets (e.g., קיזוז / ניכוי בגין הפסדי הון).
 7. Dividend Income: Extract dividend income strictly by percentage into dividend15, dividend20. Any 25% dividends must be added directly into capitalGains25. If the percentage is not explicitly written, you MUST calculate it by dividing the tax withheld by the gross dividend amount (e.g. 147 tax / 735 gross = 20%). DO NOT guess.
-8. pficFlag: set true if you detect any Passive Foreign Investment Company (PFIC / חברה נשלטת) mention.
+8. ESOP Specific: If this is an ESOP document (Form 856 / 857), map the gross payment (סכום התשלום ברוטו) to capitalGains25 if the tax withheld is exactly 25%. If the tax rate is different, place the gross into the corresponding dividend/gain field. Map the tax withheld (ניכינו מס הכנסה) to taxWithheld.
+9. pficFlag: set true if you detect any Passive Foreign Investment Company (PFIC / חברה נשלטת) mention.
+10. currency: Extract the 3-letter currency code (e.g. ILS, USD, EUR).
 
 IMPORTANT: Interest, dividends, and capital gains are SEPARATE fields. Do NOT mix them.
-CRUCIAL: You MUST provide a 'calculationLog' explaining your math step-by-step. The very first sentence MUST state the owner (e.g. "Account Owner: SHARED"). For each value you calculate, write a detailed sentence like: "Box X - added Y from page Z for 20% capital gains tax". For taxWithheld, you MUST list the exact breakdown of the numbers you summed (e.g. "Tax Withheld: 467 (dividend from page 3) + 71 (real estate from page 4) = 538"). If you calculate a dividend percentage, you MUST write the math (e.g. "147 / 735 = 20%").
-
-All monetary values in ILS. Return 0 for any field not found.`;
+CRUCIAL: You MUST provide a 'calculationLog' explaining your math step-by-step. The very first sentence MUST state the owner (e.g. "Account Owner: SHARED"). For each value you calculate, write a detailed sentence like: "Box X - added Y from page Z for 20% capital gains tax". For taxWithheld, you MUST list the exact breakdown of the numbers you summed (e.g. "Tax Withheld: 467 (dividend from page 3) + 71 (real estate from page 4) = 538"). If you calculate a dividend percentage, you MUST write the math (e.g. "147 / 735 = 20%").`;
 
 const DONATION_PROMPT = `You are extracting data from an Israeli donation receipt (קבלה לתרומה / קבלה ממוסד ציבורי).
 CRITICAL RULES:
@@ -273,7 +278,8 @@ const ANNUAL_CPA_SUMMARY_PROMPT = `Extract the financial data from this annual C
 4. rentalIncomeIsrael: Total gross rental income in Israel (usually 10% track).
 5. rentalIncomeAbroad: Total gross rental income from abroad (usually 15% track).
 6. businessIncome: Total net business income (הכנסה חייבת מעסק).
-7. Provide a calculationLog.`;
+7. currency: The 3-letter currency code the document is in (e.g. ILS, USD, EUR). Do NOT convert amounts.
+8. Provide a calculationLog.`;
 
 
 const US_FORM_1099_PROMPT = `Extract the financial data from this US Form 1099 Consolidated Tax Statement (e.g. Morgan Stanley, E*TRADE, Fidelity).
@@ -282,8 +288,9 @@ CRITICAL RULES:
 2. bankName: The broker name (e.g. "E*TRADE", "Fidelity", "Morgan Stanley").
 3. foreignIncome: SUM the total Ordinary Dividends, total Interest Income, and total Proceeds/Gains. ALL income on this form is foreign income (Box 290). DO NOT use dividend15, capitalGains25, etc.
 4. foreignTaxWithheld: The total Federal Income Tax Withheld.
-5. All other fields (taxWithheld, dividend20, capitalGains20, etc.) MUST be 0.
-6. Provide a calculationLog.`;
+5. currency: Identify the country/currency (e.g. USA -> USD, Europe -> EUR). Do NOT convert amounts to ILS, extract them exactly as they appear in the original currency.
+6. All other fields (taxWithheld, dividend20, capitalGains20, etc.) MUST be 0.
+7. Provide a calculationLog.`;
 
 const EXTRACTION_CONFIG: Record<
   string,
@@ -291,6 +298,7 @@ const EXTRACTION_CONFIG: Record<
 > = {
   FORM_106: { prompt: FORM_106_PROMPT, responseSchema: Form106ResponseSchema, zodSchema: Form106Schema },
   FORM_867: { prompt: FORM_867_PROMPT, responseSchema: Form867ResponseSchema, zodSchema: Form867Schema },
+  FORM_856: { prompt: FORM_867_PROMPT, responseSchema: Form867ResponseSchema, zodSchema: Form867Schema },
   DONATION_RECEIPT: { prompt: DONATION_PROMPT, responseSchema: DonationReceiptResponseSchema, zodSchema: DonationReceiptSchema },
   CONSULTANT_INVOICE: { prompt: CONSULTANT_PROMPT, responseSchema: ConsultantInvoiceResponseSchema, zodSchema: ConsultantInvoiceSchema },
   LIFE_INSURANCE: { prompt: LIFE_INSURANCE_PROMPT, responseSchema: LifeInsuranceResponseSchema, zodSchema: LifeInsuranceSchema },
@@ -346,13 +354,7 @@ export async function extractDocument(
     return { file: fileName, classification, data: null };
   }
 
-  // Handle FORM_856 (ESOP): extract using Form867 schema but map to dividends downstream
-  const extractionDocType =
-    classification.documentType === 'FORM_856'
-      ? 'FORM_867'
-      : classification.documentType;
-
-  const extractionConfig = EXTRACTION_CONFIG[extractionDocType] ?? config;
+  const extractionConfig = config;
 
   const extractionResponse = await ai.models.generateContent({
     model: MODEL,

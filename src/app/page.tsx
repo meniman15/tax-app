@@ -45,7 +45,7 @@ function getBadgeClass(cls?: string): string {
 }
 
 function getBadgeLabel(cls?: string): string {
-  if (!cls) return 'Processing…';
+  if (!cls) return 'Pending';
   const labels: Record<string, string> = {
     FORM_106: 'Form 106',
     FORM_867: 'Form 867',
@@ -140,12 +140,17 @@ export default function TaxAssistantPage() {
 
   /* ── File Handling ─────────────────────────────────────────── */
   const addFiles = useCallback((newFiles: File[]) => {
-    const uploadedFiles: UploadedFile[] = newFiles.map(f => ({
-      id: `${f.name}-${Date.now()}-${Math.random()}`,
-      file: f,
-      status: 'pending',
-    }));
-    setFiles(prev => [...prev, ...uploadedFiles]);
+    setFiles(prev => {
+      const existingSignatures = new Set(prev.map(f => `${f.file.name}-${f.file.size}`));
+      const uniqueNewFiles = newFiles.filter(f => !existingSignatures.has(`${f.name}-${f.size}`));
+
+      const uploadedFiles: UploadedFile[] = uniqueNewFiles.map(f => ({
+        id: `${f.name}-${Date.now()}-${Math.random()}`,
+        file: f,
+        status: 'pending',
+      }));
+      return [...prev, ...uploadedFiles];
+    });
   }, []);
 
   const removeFile = useCallback((id: string) => {
@@ -386,11 +391,16 @@ export default function TaxAssistantPage() {
                     <div className="file-name">{f.file.name}</div>
                     <div className="file-size">{formatBytes(f.file.size)}</div>
                   </div>
-                  <span className={`file-badge ${getBadgeClass(f.status === 'error' ? 'error' : f.classification)}`}>
+                  <span className={`file-badge ${getBadgeClass(f.status === 'error' ? 'error' : f.status === 'pending' ? undefined : f.classification)}`}>
                     {f.status === 'processing' ? (
                       <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <span className="spinner" style={{ width: 10, height: 10, borderWidth: 1.5 }} />
                         Processing
+                      </span>
+                    ) : f.status === 'done' ? (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        Processed ({getBadgeLabel(f.classification)})
                       </span>
                     ) : getBadgeLabel(f.status === 'error' ? 'error' : f.classification)}
                   </span>
@@ -715,6 +725,22 @@ export default function TaxAssistantPage() {
               <p className="text-muted">No calculations recorded.</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                {formType === 'IL' && Object.keys(taxMap).length > 0 && (() => {
+                  const estimate = calculateEstimatedReturn(taxMap);
+                  if (!estimate.calculationLog || estimate.calculationLog.length === 0) return null;
+                  return (
+                    <div style={{ padding: 16, backgroundColor: 'rgba(0,209,255,0.05)', borderRadius: 8, border: '1px solid rgba(0,209,255,0.2)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                        <strong style={{ color: '#00D1FF' }}>📊 Final Tax Summary Calculation</strong>
+                      </div>
+                      <ul style={{ listStyle: 'disc', paddingLeft: 20, margin: 0, fontSize: '0.9rem', color: '#ccc', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {estimate.calculationLog.map((reason, k) => (
+                          <li key={k}>{reason}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })()}
                 {aggregationLog.map((log, i) => (
                   <div key={i} style={{ padding: 16, backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>

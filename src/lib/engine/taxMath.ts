@@ -1,6 +1,7 @@
 import { BOX_DESCRIPTIONS } from '../config/boxDescriptions';
 import taxCodes from '../config/taxCodes.json';
 import taxTotals from '../config/taxTotals.json';
+import { EXCHANGE_RATES } from '../config/rules';
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -97,60 +98,69 @@ export function aggregateToTaxMap(
       docType === 'CONSULTANT_INVOICE' || docType === 'PENSION_DEPOSIT' || docType === 'ANNUAL_CPA_SUMMARY' ? d.providerName :
       docType === 'LIFE_INSURANCE' ? d.insuranceCompany :
       '';
-    const suffix = sourceName ? ` - ${sourceName}` : '';
+      
+    const currency = typeof d.currency === 'string' ? d.currency.toUpperCase() : 'ILS';
+    const exchangeRate = EXCHANGE_RATES[currency] ?? 1.0;
+    const currencySuffix = currency !== 'ILS' ? ` (Converted from ${currency}@${exchangeRate})` : '';
+    
+    const suffix = sourceName ? ` - ${sourceName}${currencySuffix}` : currencySuffix;
+    
+    const money = (val: unknown) => Math.round(asNum(val, exchangeRate));
 
     switch (docType) {
       case 'FORM_106':
-        addToMap(map, taxCodes.salary.boxes[ownIdx], asNum(d.grossIncome), logEntry, `Gross Income${suffix}`);
-        addToMap(map, taxTotals.salaryTax.box, asNum(d.taxWithheld), logEntry, `Income Tax Withheld${suffix}`);
-        addToMap(map, taxCodes.kerenHishtalmut.boxes[ownIdx], asNum(d.kerenHishtalmutSalary), logEntry, `Keren Hishtalmut Base${suffix}`);
-        addToMap(map, taxCodes.pensionAllowance.boxes[ownIdx], asNum(d.pensionAllowance), logEntry, `Pension Allowance${suffix}`);
-        addToMap(map, taxCodes.pensionInsured.boxes[ownIdx], asNum(d.pensionInsuredSalary), logEntry, `Pension Insured Salary${suffix}`);
-        addToMap(map, taxCodes.pensionDeduction.boxes[ownIdx], asNum(d.pensionEmployeeDeduction), logEntry, `Pension Employee Deduction${suffix}`);
-        addToMap(map, taxCodes.recreationPay.boxes[ownIdx], asNum(d.recreationPayDeduction), logEntry, `Recreation Pay Deduction${suffix}`);
-        // Accumulate credit points from all Form 106s
+        addToMap(map, taxCodes.salary.boxes[ownIdx], money(d.grossIncome), logEntry, `Gross Income${suffix}`);
+        addToMap(map, taxTotals.salaryTax.box, money(d.taxWithheld), logEntry, `Income Tax Withheld${suffix}`);
+        addToMap(map, taxCodes.kerenHishtalmut.boxes[ownIdx], money(d.kerenHishtalmutSalary), logEntry, `Keren Hishtalmut Base${suffix}`);
+        addToMap(map, taxCodes.pensionAllowance.boxes[ownIdx], money(d.pensionAllowance), logEntry, `Pension Allowance${suffix}`);
+        addToMap(map, taxCodes.pensionInsured.boxes[ownIdx], money(d.pensionInsuredSalary), logEntry, `Pension Insured Salary${suffix}`);
+        addToMap(map, taxCodes.pensionDeduction.boxes[ownIdx], money(d.pensionEmployeeDeduction), logEntry, `Pension Employee Deduction${suffix}`);
+        addToMap(map, taxCodes.recreationPay.boxes[ownIdx], money(d.recreationPayDeduction), logEntry, `Recreation Pay Deduction${suffix}`);
+        // Accumulate credit points from all Form 106s (no conversion needed)
         if (asNum(d.creditPoints) > 0) {
           form106CreditPoints = (form106CreditPoints ?? 0) + asNum(d.creditPoints);
         }
         break;
 
       case 'FORM_867':
-        addToMap(map, taxCodes.capitalGains25.boxes[ownIdx], asNum(d.capitalGains25), logEntry, `Capital Gains (25%)${suffix}`);
-        addToMap(map, taxTotals.capitalLosses.box, asNum(d.totalLosses), logEntry, `Total Capital Losses${suffix}`);
-        addToMap(map, taxTotals.salesTurnover.box, asNum(d.salesTurnover), logEntry, `Sales Turnover${suffix}`);
+        addToMap(map, taxCodes.capitalGains25.boxes[ownIdx], money(d.capitalGains25), logEntry, `Capital Gains (25%)${suffix}`);
+        addToMap(map, taxTotals.capitalLosses.box, money(d.totalLosses), logEntry, `Total Capital Losses${suffix}`);
+        addToMap(map, taxTotals.salesTurnover.box, money(d.salesTurnover), logEntry, `Sales Turnover${suffix}`);
         
-        addToMap(map, taxTotals.capitalGainsTax.box, asNum(d.taxWithheld), logEntry, `Tax on Capital Gains and Dividends${suffix}`);
+        addToMap(map, taxTotals.capitalGainsTax.box, money(d.taxWithheld), logEntry, `Tax on Capital Gains and Dividends${suffix}`);
 
-        addToMap(map, taxCodes.interest15.boxes[ownIdx], asNum(d.interest15), logEntry, `Interest Income (15%)${suffix}`);
-        addToMap(map, taxCodes.interest20.boxes[ownIdx], asNum(d.interest20), logEntry, `Interest Income (20%)${suffix}`);
-        addToMap(map, taxCodes.interest25.boxes[ownIdx], asNum(d.interest25), logEntry, `Interest Income (25%)${suffix}`);
-        addToMap(map, taxTotals.interestTax.box, asNum(d.interestTaxWithheld), logEntry, `Tax on Interest${suffix}`);
-        addToMap(map, taxCodes.dividend15.boxes[ownIdx], asNum(d.dividend15), logEntry, `Dividend Income (15%)${suffix}`);
-        addToMap(map, taxCodes.dividend20.boxes[ownIdx], asNum(d.dividend20), logEntry, `Dividend Income (20%)${suffix}`);
-        addToMap(map, taxCodes.foreignIncome.boxes[ownIdx], asNum(d.foreignIncome), logEntry, `Foreign Income${suffix}`);
-        addToMap(map, taxCodes.foreignTaxWithheld.boxes[ownIdx], asNum(d.foreignTaxWithheld), logEntry, `Foreign Tax Withheld${suffix}`);
+        addToMap(map, taxCodes.interest15.boxes[ownIdx], money(d.interest15), logEntry, `Interest Income (15%)${suffix}`);
+        addToMap(map, taxCodes.interest20.boxes[ownIdx], money(d.interest20), logEntry, `Interest Income (20%)${suffix}`);
+        addToMap(map, taxCodes.interest25.boxes[ownIdx], money(d.interest25), logEntry, `Interest Income (25%)${suffix}`);
+        addToMap(map, taxTotals.interestTax.box, money(d.interestTaxWithheld), logEntry, `Tax on Interest${suffix}`);
+        addToMap(map, taxCodes.dividend15.boxes[ownIdx], money(d.dividend15), logEntry, `Dividend Income (15%)${suffix}`);
+        addToMap(map, taxCodes.dividend20.boxes[ownIdx], money(d.dividend20), logEntry, `Dividend Income (20%)${suffix}`);
+        addToMap(map, taxCodes.foreignIncome.boxes[ownIdx], money(d.foreignIncome), logEntry, `Foreign Income${suffix}`);
+        addToMap(map, taxCodes.foreignTaxWithheld.boxes[ownIdx], money(d.foreignTaxWithheld), logEntry, `Foreign Tax Withheld${suffix}`);
         break;
 
       
       case 'US_FORM_1099':
-        addToMap(map, taxCodes.foreignIncome.boxes[ownIdx], asNum(d.foreignIncome), logEntry, `Foreign Income${suffix}`);
-        addToMap(map, taxCodes.foreignTaxWithheld.boxes[ownIdx], asNum(d.foreignTaxWithheld), logEntry, `Foreign Tax Withheld${suffix}`);
+        addToMap(map, taxCodes.foreignIncome.boxes[ownIdx], money(d.foreignIncome), logEntry, `Foreign Income${suffix}`);
+        addToMap(map, taxCodes.foreignTaxWithheld.boxes[ownIdx], money(d.foreignTaxWithheld), logEntry, `Foreign Tax Withheld${suffix}`);
         break;
 
       case 'FORM_856':
-        addToMap(map, taxCodes.dividend15.boxes[ownIdx], asNum(d.dividend15), logEntry, `ESOP Dividend (15%)${suffix}`);
-        addToMap(map, taxCodes.capitalGains25.boxes[ownIdx], asNum(d.capitalGains25), logEntry, `ESOP Gains (25%)${suffix}`);
+        addToMap(map, taxCodes.dividend15.boxes[ownIdx], money(d.dividend15), logEntry, `ESOP Dividend (15%)${suffix}`);
+        addToMap(map, taxCodes.capitalGains25.boxes[ownIdx], money(d.capitalGains25), logEntry, `ESOP Gains / Dividend (25%)${suffix}`);
+        addToMap(map, taxTotals.capitalGainsTax.box, money(d.taxWithheld), logEntry, `Tax on ESOP Gains / Dividend${suffix}`);
+        addToMap(map, taxTotals.capitalLosses.box, money(d.totalLosses), logEntry, `Total ESOP Capital Losses${suffix}`);
         break;
 
       case 'DONATION_RECEIPT': {
         const receipts = d.receipts as unknown as Array<{ charityName: string; amount: number; isSection46Approved: boolean }>;
         if (Array.isArray(receipts)) {
           for (const r of receipts) {
-            const rSuffix = r.charityName ? ` - ${r.charityName}` : '';
+            const rSuffix = r.charityName ? ` - ${r.charityName}${currencySuffix}` : currencySuffix;
             if (r.isSection46Approved) {
-              addToMap(map, taxCodes.donations.boxes[ownIdx], asNum(r.amount), logEntry, `Section 46 Donation${rSuffix}`);
+              addToMap(map, taxCodes.donations.boxes[ownIdx], money(r.amount), logEntry, `Section 46 Donation${rSuffix}`);
             } else {
-              addToMap(map, 'DECLINED_DONATIONS', asNum(r.amount), logEntry, `Declined Donation${rSuffix} (Missing Sec 46)`);
+              addToMap(map, 'DECLINED_DONATIONS', money(r.amount), logEntry, `Declined Donation${rSuffix} (Missing Sec 46)`);
             }
           }
         }
@@ -158,23 +168,23 @@ export function aggregateToTaxMap(
       }
 
       case 'CONSULTANT_INVOICE':
-        addToMap(map, taxTotals.taxPrep.box, asNum(d.amount), logEntry, `Tax Prep Expense${suffix}`);
+        addToMap(map, taxTotals.taxPrep.box, money(d.amount), logEntry, `Tax Prep Expense${suffix}`);
         break;
 
       case 'LIFE_INSURANCE':
-        addToMap(map, taxCodes.lifeInsurance.boxes[ownIdx], asNum(d.lifeInsurancePremium), logEntry, `Life Insurance${suffix}`);
-        addToMap(map, taxCodes.lossOfWorkingCapacity.boxes[ownIdx], asNum(d.lossOfWorkingCapacityPremium), logEntry, `Loss of Working Capacity${suffix}`);
+        addToMap(map, taxCodes.lifeInsurance.boxes[ownIdx], money(d.lifeInsurancePremium), logEntry, `Life Insurance${suffix}`);
+        addToMap(map, taxCodes.lossOfWorkingCapacity.boxes[ownIdx], money(d.lossOfWorkingCapacityPremium), logEntry, `Loss of Working Capacity${suffix}`);
         break;
 
 
       case 'PENSION_DEPOSIT':
-        addToMap(map, taxCodes.independentPension.boxes[ownIdx], asNum(d.amount), logEntry, `Pension Deposit${suffix}`);
+        addToMap(map, taxCodes.independentPension.boxes[ownIdx], money(d.amount), logEntry, `Pension Deposit${suffix}`);
         break;
 
       case 'ANNUAL_CPA_SUMMARY':
-        addToMap(map, taxCodes.rentalIncomeIsrael.boxes[ownIdx], asNum(d.rentalIncomeIsrael), logEntry, `Rental Income Israel${suffix}`);
-        addToMap(map, taxCodes.rentalIncomeAbroad.boxes[ownIdx], asNum(d.rentalIncomeAbroad), logEntry, `Rental Income Abroad${suffix}`);
-        addToMap(map, taxCodes.businessIncome.boxes[ownIdx], asNum(d.businessIncome), logEntry, `Business Income${suffix}`);
+        addToMap(map, taxCodes.rentalIncomeIsrael.boxes[ownIdx], money(d.rentalIncomeIsrael), logEntry, `Rental Income Israel${suffix}`);
+        addToMap(map, taxCodes.rentalIncomeAbroad.boxes[ownIdx], money(d.rentalIncomeAbroad), logEntry, `Rental Income Abroad${suffix}`);
+        addToMap(map, taxCodes.businessIncome.boxes[ownIdx], money(d.businessIncome), logEntry, `Business Income${suffix}`);
         break;
 
       default:
@@ -198,11 +208,11 @@ export function aggregateToTaxMap(
 
 // ── Utility ─────────────────────────────────────────────────────────────────
 
-function asNum(val: unknown): number {
-  if (typeof val === 'number') return val;
+function asNum(val: unknown, multiplier: number = 1.0): number {
+  if (typeof val === 'number') return val * multiplier;
   if (typeof val === 'string') {
     const parsed = parseFloat(val);
-    return isNaN(parsed) ? 0 : parsed;
+    return isNaN(parsed) ? 0 : parsed * multiplier;
   }
   return 0;
 }

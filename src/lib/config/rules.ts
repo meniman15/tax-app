@@ -20,6 +20,17 @@ export const IRS_YEARLY_AVERAGE_RATE = 3.451;
  */
 export const TREASURY_YEAR_END_RATE = 3.191;
 
+/**
+ * Common exchange rates to ILS for the 2025 tax year.
+ * (If a currency is not listed, defaults to 1.0)
+ */
+export const EXCHANGE_RATES: Record<string, number> = {
+  'USD': IRS_YEARLY_AVERAGE_RATE,
+  'EUR': 3.45,  // Example rate
+  'GBP': 4.5,   // Example rate
+  'ILS': 1.0,
+};
+
 /** Israeli progressive income tax brackets for 2025 (annual amounts in ILS) */
 export const TAX_BRACKETS_ANNUAL: readonly { min: number; max: number; rate: number }[] = [
   { min: 0, max: 84120, rate: 0.10 },

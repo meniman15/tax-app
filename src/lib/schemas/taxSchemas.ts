@@ -88,6 +88,7 @@ export const Form867Schema = z.object({
   foreignIncome: z.number().default(0).describe('Foreign income (dividends/capital gains)'),
   foreignTaxWithheld: z.number().default(0).describe('Tax withheld abroad'),
   pficFlag: z.boolean().default(false),
+  currency: z.string().default('ILS').describe('The original 3-letter currency code of the document (e.g. ILS, USD, EUR, GBP)'),
   calculationLog: z.array(z.string()).default([]),
 });
 
@@ -154,6 +155,7 @@ export const AnnualSummarySchema = z.object({
   rentalIncomeIsrael: z.number().default(0),
   rentalIncomeAbroad: z.number().default(0),
   businessIncome: z.number().default(0),
+  currency: z.string().default('ILS').describe('The original 3-letter currency code (e.g. ILS, USD, EUR, GBP)'),
   calculationLog: z.array(z.string()).default([]),
 });
 
